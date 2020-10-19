@@ -3,11 +3,9 @@ using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Threading;
 using OTPManager.Helpers;
-using PropertyChanged;
 
 namespace OTPManager.ViewModels
 {
-    [AddINotifyPropertyChangedInterface]
     public class LoginViewModel : INotifyPropertyChanged
     {
         bool _infoMessageIsNew;

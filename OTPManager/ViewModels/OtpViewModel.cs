@@ -7,11 +7,9 @@ using System.Windows.Threading;
 using OTPManager.DBModels;
 using OTPManager.Helpers;
 using OTPManager.Models;
-using PropertyChanged;
 
 namespace OTPManager.ViewModels
 {
-    [AddINotifyPropertyChangedInterface]
     public class OtpViewModel : INotifyPropertyChanged
     {
         const int DEFAULT_BASE32_SECRET_KEY_SIZE = 32;
