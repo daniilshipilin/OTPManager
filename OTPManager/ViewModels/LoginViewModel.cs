@@ -6,12 +6,10 @@ using OTPManager.Helpers;
 
 namespace OTPManager.ViewModels
 {
-    public class LoginViewModel : INotifyPropertyChanged
+    public class LoginViewModel : ViewModelBase, INotifyPropertyChanged
     {
         bool _infoMessageIsNew;
         readonly DispatcherTimer _timer;
-
-        public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
         public string WindowTitle => "OTPManager Login";
 

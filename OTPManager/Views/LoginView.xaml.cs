@@ -14,7 +14,7 @@ namespace OTPManager.Views
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (DataContext != null)
+            if (DataContext is object)
             {
                 ((LoginViewModel)DataContext).Password = ((PasswordBox)sender).Password;
             }

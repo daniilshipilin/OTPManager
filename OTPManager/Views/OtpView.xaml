@@ -7,7 +7,7 @@
         xmlns:viewmodel="clr-namespace:OTPManager.ViewModels"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="400" Width="700" MinHeight="400" MinWidth="700"
-        WindowStartupLocation="CenterScreen" FontSize="16" Icon="/OTPManager;component/Images/2fa.ico">
+        WindowStartupLocation="CenterScreen" FontSize="16" Icon="/OTPManager;component/Images/2fa.ico" Loaded="Window_Loaded">
     <!--Visibility="{Binding WindowVisibility, Mode=TwoWay}"-->
 
     <!--<Window.Resources>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -10,7 +11,7 @@ using OTPManager.Models;
 
 namespace OTPManager.ViewModels
 {
-    public class OtpViewModel : INotifyPropertyChanged
+    public class OtpViewModel : ViewModelBase, INotifyPropertyChanged
     {
         const int DEFAULT_BASE32_SECRET_KEY_SIZE = 32;
 
@@ -18,10 +19,8 @@ namespace OTPManager.ViewModels
         readonly DispatcherTimer _infoMessageResetTimer;
         bool _infoMessageIsNew;
 
-        public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
-
-        public string WindowTitle => "OTPManager: Time-based One-time Password generator";
-        public string ProgramInfo => GitVersionInformation.InformationalVersion;
+        public string WindowTitle { get; } = "OTPManager: Time-based One-time Password generator";
+        public string ProgramInfo { get; } = GitVersionInformation.InformationalVersion;
 
         public ICommand EscapeCommand { get; }
         public ICommand CopyCommand { get; }
@@ -34,9 +33,9 @@ namespace OTPManager.ViewModels
         public ObservableCollection<OtpObject> Otps { get; set; } = new ObservableCollection<OtpObject>();
         public OtpObject SelectedOtp { get; set; }
         bool CanCopyOtpValue => TotpValue.Length != 0;
-        bool CanUpdateDBRecord => Otps.Count > 0 && SelectedOtp != null;
+        bool CanUpdateDBRecord => Otps.Count > 0 && SelectedOtp is object;
         bool CanInsertDBRecord => true;
-        bool CanDeleteDBRecord => Otps.Count > 0 && SelectedOtp != null;
+        bool CanDeleteDBRecord => Otps.Count > 0 && SelectedOtp is object;
         public string InfoMessage { get; set; }
         public string TotpValue { get; set; } = string.Empty;
         public string RemainingSeconds { get; set; }
@@ -46,9 +45,9 @@ namespace OTPManager.ViewModels
         {
             EscapeCommand = new RelayCommand(param => RequestClose());
             CopyCommand = new RelayCommand(param => CopyOtpValue(), param => CanCopyOtpValue);
-            UpdateDBRecordCommand = new RelayCommand(param => UpdateDBRecord(), param => CanUpdateDBRecord);
-            InsertDBRecordCommand = new RelayCommand(param => InsertDBRecord(), param => CanInsertDBRecord);
-            DeleteDBRecordCommand = new RelayCommand(param => DeleteDBRecord(), param => CanDeleteDBRecord);
+            UpdateDBRecordCommand = new RelayCommand(param => PromptUpdate("Update existing record?"), param => CanUpdateDBRecord);
+            InsertDBRecordCommand = new RelayCommand(param => PromptInsert("Insert new record?"), param => CanInsertDBRecord);
+            DeleteDBRecordCommand = new RelayCommand(param => PromptDelete("Delete existing record?"), param => CanDeleteDBRecord);
             RefreshDBRecordsCommand = new RelayCommand(param => InitData());
 
             InitData();
@@ -95,7 +94,7 @@ namespace OTPManager.ViewModels
             // select first item
             if (Otps.Count > 0)
             {
-                SelectedOtp = Otps[0];
+                SelectedOtp = Otps.First();
             }
 
             TotpValue = string.Empty;
@@ -199,6 +198,45 @@ namespace OTPManager.ViewModels
             catch (Exception ex)
             {
                 PrintMessage(ex.Message);
+            }
+        }
+
+        protected void PromptUpdate(string message)
+        {
+            MessageBox_Show(ProcessUpdatePrompt, message, "Prompt", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        }
+
+        protected void PromptInsert(string message)
+        {
+            MessageBox_Show(ProcessInsertPrompt, message, "Prompt", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        }
+
+        protected void PromptDelete(string message)
+        {
+            MessageBox_Show(ProcessDeletePrompt, message, "Prompt", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        }
+
+        public void ProcessUpdatePrompt(MessageBoxResult result)
+        {
+            if (result == MessageBoxResult.Yes)
+            {
+                UpdateDBRecord();
+            }
+        }
+
+        public void ProcessInsertPrompt(MessageBoxResult result)
+        {
+            if (result == MessageBoxResult.Yes)
+            {
+                InsertDBRecord();
+            }
+        }
+
+        public void ProcessDeletePrompt(MessageBoxResult result)
+        {
+            if (result == MessageBoxResult.Yes)
+            {
+                DeleteDBRecord();
             }
         }
     }
