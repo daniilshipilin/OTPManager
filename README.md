@@ -2,7 +2,7 @@
 
 # OTPManager
 
-### Author: Daniil Shipilin (daniil.shipilin@gmail.com)
+### Author: Daniil Shipilin
 
 Time-based One-time Password generator manager.
 
