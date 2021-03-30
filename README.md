@@ -1,4 +1,4 @@
-![2fa.ico](./OTPManager/Images/2fa.ico)
+![2fa.ico](./OTPManager.Wpf/Images/2fa.ico)
 
 # OTPManager
 
