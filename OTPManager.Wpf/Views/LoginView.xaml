@@ -1,0 +1,55 @@
+<Window x:Class="OTPManager.Wpf.Views.LoginView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="OTPManager Login"
+        Icon="/Images/key.ico"
+        Height="225"
+        Width="325"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        FontSize="16"
+        Loaded="Window_Loaded"
+        KeyDown="Window_KeyDown">
+
+    <Border BorderThickness="20">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Text="Please, provide the current encryption password:"
+                       VerticalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"/>
+
+            <PasswordBox x:Name="passwordBox"
+                         Grid.Row="1"
+                         Grid.Column="0"
+                         VerticalAlignment="Center"
+                         Padding="3"
+                         HorizontalAlignment="Center" Width="200"
+                         PasswordChanged="PasswordBox_PasswordChanged"
+                         KeyDown="PasswordBox_KeyDown"/>
+
+            <Button x:Name="loginButton"
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Content="Login"
+                    Width="100"
+                    Padding="3"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Click="LoginButton_Click"/>
+        </Grid>
+    </Border>
+</Window>

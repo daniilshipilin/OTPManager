@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net5.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <ApplicationIcon>Images\2fa.ico</ApplicationIcon>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <AssemblyName>OTPManager</AssemblyName>
+        <RootNamespace>OTPManager.Wpf</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="Images\2fa.ico" />
+      <None Remove="Images\2fa.png" />
+      <None Remove="Images\key.ico" />
+      <None Remove="Images\key.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="GitVersionTask" Version="5.5.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Otp.NET" Version="1.2.2" />
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="Images\2fa.ico" />
+      <Resource Include="Images\2fa.png" />
+      <Resource Include="Images\key.ico" />
+      <Resource Include="Images\key.png" />
+    </ItemGroup>
+
+</Project>
