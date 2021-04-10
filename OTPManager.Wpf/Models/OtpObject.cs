@@ -32,7 +32,7 @@ namespace OTPManager.Wpf.Models
 
             set
             {
-                string tmp = value.ToUpper().Trim();
+                string tmp = value.ToUpper().Replace(" ", string.Empty);
 
                 if (!Base32SecretKeyIsValid(tmp))
                 {
