@@ -55,9 +55,12 @@ namespace OTPManager.Wpf.Helpers
             var jsonObj = JsonConvert.DeserializeObject<OtpKeysJSON>(json);
             var otps = new List<OtpObject>();
 
-            foreach (var entry in jsonObj.OtpEntries)
+            if (jsonObj is not null)
             {
-                otps.Add(new OtpObject(entry.Description, entry.Base32SecretKey));
+                foreach (var entry in jsonObj.OtpEntries)
+                {
+                    otps.Add(new OtpObject(entry.Description, entry.Base32SecretKey));
+                }
             }
 
             return otps;
