@@ -200,7 +200,8 @@ namespace OTPManager.Wpf.Views
         {
             if (SelectedOtp is not null)
             {
-                otpValueTextBlock.Text = SelectedOtp.TotpValue;
+                int totpHalfSize = SelectedOtp.TotpSize / 2;
+                otpValueTextBlock.Text = $"{SelectedOtp.TotpValue[0..totpHalfSize]} {SelectedOtp.TotpValue[totpHalfSize..]}";
                 otpRemainingSecondsTextBlock.Text = $"{SelectedOtp.RemainingSeconds} sec.";
                 progressBar.Value = (SelectedOtp.TimeWindowStep - SelectedOtp.RemainingSeconds) / (double)SelectedOtp.TimeWindowStep * 100;
             }
