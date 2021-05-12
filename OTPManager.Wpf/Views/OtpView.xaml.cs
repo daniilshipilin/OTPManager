@@ -80,7 +80,7 @@ namespace OTPManager.Wpf.Views
             ClearTextBoxes();
             Otps.Clear();
 
-            foreach (var otpKey in OtpKeysFileProcessor.LoadData())
+            foreach (var otpKey in OtpKeysFileProcessor.LoadData().OrderBy(x => x.Description))
             {
                 Otps.Add(otpKey);
             }
