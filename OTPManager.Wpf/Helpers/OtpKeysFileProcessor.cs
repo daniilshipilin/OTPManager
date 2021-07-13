@@ -74,7 +74,11 @@ namespace OTPManager.Wpf.Helpers
             {
                 foreach (var entry in otps)
                 {
-                    jsonObj.OtpEntries.Add(new OtpKeysJSON.OtpEntry() { Description = entry.Description, Base32SecretKey = entry.Base32SecretKey });
+                    jsonObj.OtpEntries.Add(new OtpKeysJSON.OtpEntry()
+                    {
+                        Description = entry.Description,
+                        Base32SecretKey = entry.Base32SecretKey,
+                    });
                 }
             }
 
