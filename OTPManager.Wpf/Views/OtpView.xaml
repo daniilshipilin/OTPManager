@@ -69,9 +69,8 @@
                   FontFamily="Consolas"
                   SelectedCellsChanged="OtpsDataGrid_SelectedCellsChanged">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="200" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Base32SecretKey" Binding="{Binding Base32SecretKey}" Width="400" IsReadOnly="True"/>
-                <DataGridTextColumn Header="LastEditTimestampFormatted" Binding="{Binding LastEditTimestampFormatted}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="Auto" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Last Edited" Binding="{Binding LastEditTimestampFormatted}" Width="Auto" IsReadOnly="True"/>
 
             </DataGrid.Columns>
         </DataGrid>

@@ -50,7 +50,12 @@ namespace OTPManager.Wpf.Models
                 }
 
                 base32SecretKey = tmp;
-                totp = new Totp(Base32Encoding.ToBytes(Base32SecretKey), TimeWindowStep, HashMode, TotpSize, TimeCorr);
+                totp = new Totp(
+                    Base32Encoding.ToBytes(base32SecretKey),
+                    TimeWindowStep,
+                    HashMode,
+                    TotpSize,
+                    TimeCorr);
             }
         }
 
