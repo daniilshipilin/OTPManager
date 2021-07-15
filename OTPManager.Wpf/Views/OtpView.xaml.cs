@@ -12,8 +12,8 @@ namespace OTPManager.Wpf.Views
 
     public partial class OtpView : Window
     {
-        private readonly DispatcherTimer otpUpdateTimer = new DispatcherTimer();
-        private readonly DispatcherTimer infoMessageResetTimer = new DispatcherTimer();
+        private readonly DispatcherTimer otpUpdateTimer = new();
+        private readonly DispatcherTimer infoMessageResetTimer = new();
         private bool infoMessageIsNew;
 
         public OtpView()
@@ -138,6 +138,7 @@ namespace OTPManager.Wpf.Views
                     {
                         SelectedOtp.Description = selectedOtpDescriptionTextBox.Text;
                         SelectedOtp.Base32SecretKey = selectedOtpBase32SecretKeyTextBox.Text;
+                        SelectedOtp.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
                         OtpKeysFileProcessor.SaveData(Otps);
                         PrintInfoMessage("Record updated");
                         InitData();
@@ -184,6 +185,7 @@ namespace OTPManager.Wpf.Views
                     try
                     {
                         SelectedOtp.Base32SecretKey = OtpObject.GetRandomBase32String();
+                        SelectedOtp.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
                         OtpKeysFileProcessor.SaveData(Otps);
                         PrintInfoMessage("Base32 secret key generated");
                         InitData();

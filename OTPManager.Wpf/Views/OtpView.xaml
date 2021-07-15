@@ -6,10 +6,10 @@
         mc:Ignorable="d"
         Title="OTPManager: Time-based One-time Password generator"
         Icon="/Images/2fa.ico"
-        Height="400"
-        Width="700"
-        MinHeight="400"
-        MinWidth="700"
+        Height="600"
+        Width="800"
+        MinHeight="600"
+        MinWidth="800"
         WindowStartupLocation="CenterScreen"
         FontSize="16"
         Loaded="Window_Loaded"
@@ -71,6 +71,8 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="200" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Base32SecretKey" Binding="{Binding Base32SecretKey}" Width="400" IsReadOnly="True"/>
+                <DataGridTextColumn Header="LastEditTimestampFormatted" Binding="{Binding LastEditTimestampFormatted}" IsReadOnly="True"/>
+
             </DataGrid.Columns>
         </DataGrid>
 

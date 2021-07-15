@@ -17,10 +17,8 @@ namespace OTPManager.Wpf.Models
             [JsonProperty("base32secretkey")]
             public string Base32SecretKey { get; set; } = string.Empty;
 
-            public override string ToString()
-            {
-                return $"{nameof(Description)}: {Description},{nameof(Base32SecretKey)}: {Base32SecretKey}";
-            }
+            [JsonProperty("lastedittimestamp")]
+            public int LastEditTimestamp { get; set; }
         }
     }
 }

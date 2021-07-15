@@ -4,11 +4,12 @@ namespace OTPManager.Wpf.Models
     using System.Collections.Generic;
     using System.Linq;
     using System.Security.Cryptography;
+    using OTPManager.Wpf.Helpers;
     using OtpNet;
 
     public class OtpObject
     {
-        public static readonly IReadOnlyList<char> Base32Charset = new char[]
+        public static readonly IReadOnlyList<char> Base32Charset = new char[32]
         {
             '2', '3', '4', '5', '6', '7',
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -22,6 +23,14 @@ namespace OTPManager.Wpf.Models
         {
             Description = description;
             Base32SecretKey = base32SecretKey;
+            LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
+        }
+
+        public OtpObject(string description, string base32SecretKey, int lastEditTimestamp)
+        {
+            Description = description;
+            Base32SecretKey = base32SecretKey;
+            LastEditTimestamp = lastEditTimestamp;
         }
 
         public string Description { get; set; }
@@ -45,6 +54,10 @@ namespace OTPManager.Wpf.Models
             }
         }
 
+        public int LastEditTimestamp { get; set; }
+
+        public string LastEditTimestampFormatted => TimestampHelper.UnixTimeStampToDateTime(LastEditTimestamp).ToString("s");
+
         public int TimeWindowStep { get; } = 30;
 
         public OtpHashMode HashMode { get; } = OtpHashMode.Sha1;
@@ -59,7 +72,7 @@ namespace OTPManager.Wpf.Models
 
         public static OtpObject GetRandomOtpObject()
         {
-            return new OtpObject("Otp Key", GetRandomBase32String());
+            return new OtpObject("_NewOtpKey", GetRandomBase32String());
         }
 
         public static string GetRandomBase32String(int length = 32)
