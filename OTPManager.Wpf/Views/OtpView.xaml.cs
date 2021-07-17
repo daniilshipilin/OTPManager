@@ -213,7 +213,7 @@ namespace OTPManager.Wpf.Views
         {
             InitData();
             SetupTimers();
-            programInfoTextBlock.Text = $"v{GitVersionInformation.SemVer}";
+            programInfoTextBlock.Text = ApplicationInfo.AppHeader;
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)

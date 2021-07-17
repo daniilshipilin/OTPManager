@@ -1,12 +1,16 @@
 namespace OTPManager.Wpf
 {
     using System;
+    using System.Threading.Tasks;
     using System.Windows;
+    using ApplicationUpdater;
     using OTPManager.Wpf.Helpers;
     using OTPManager.Wpf.Views;
 
     public partial class App : Application
     {
+        private IUpdater? updater;
+
         private static void ShowLoginView()
         {
             var view = new LoginView();
@@ -21,6 +25,8 @@ namespace OTPManager.Wpf
 
         private void ApplicationStartup(object sender, StartupEventArgs e)
         {
+            AppSettings.CheckSettings();
+
             if (e.Args.Length > 0)
             {
                 try
@@ -49,6 +55,12 @@ namespace OTPManager.Wpf
                 Environment.Exit(0);
             }
 
+            // init program updater
+            InitUpdater();
+
+            // check for updates in the background
+            Task.Run(async () => await CheckUpdates());
+
             ShowLoginView();
 
             if (OtpKeysFileProcessor.LoginIsSuccessful)
@@ -57,6 +69,66 @@ namespace OTPManager.Wpf
             }
 
             Environment.Exit(0);
+        }
+
+        private void InitUpdater()
+        {
+            try
+            {
+                updater = new Updater(
+                    ApplicationInfo.BaseDirectory,
+                    Version.Parse(GitVersionInformation.SemVer),
+                    ApplicationInfo.AppGUID,
+                    ApplicationInfo.ExePath);
+            }
+            catch (Exception ex)
+            {
+                ShowExceptionMessage(ex);
+            }
+        }
+
+        private async Task CheckUpdates()
+        {
+            if (updater is null)
+            {
+                return;
+            }
+
+            if ((DateTime.UtcNow - AppSettings.UpdatesLastCheckedTimestamp).Days >= 1)
+            {
+                try
+                {
+                    AppSettings.UpdateUpdatesLastCheckedTimestamp();
+
+                    if (await updater.CheckUpdateIsAvailable())
+                    {
+                        var dr = MessageBox.Show(
+                            updater.UpdatePromptFormatted,
+                            "Program update required",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question);
+
+                        if (dr == MessageBoxResult.Yes)
+                        {
+                            await updater.Update();
+                            Environment.Exit(0);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowExceptionMessage(ex);
+                }
+            }
+        }
+
+        private static void ShowExceptionMessage(Exception ex)
+        {
+            MessageBox.Show(
+                ex.Message,
+                ex.GetType().ToString(),
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 }
