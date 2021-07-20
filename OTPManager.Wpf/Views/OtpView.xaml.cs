@@ -2,13 +2,16 @@ namespace OTPManager.Wpf.Views
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
+    using System.Windows.Media.Imaging;
     using System.Windows.Threading;
     using OTPManager.Wpf.Helpers;
     using OTPManager.Wpf.Models;
+    using QRCoder;
 
     public partial class OtpView : Window
     {
@@ -24,6 +27,7 @@ namespace OTPManager.Wpf.Views
             SaveRecordCommand = new CommandHandler(() => SaveRecord(), () => true);
             InsertRecordCommand = new CommandHandler(() => InsertRecord(), () => true);
             DeleteRecordCommand = new CommandHandler(() => DeleteRecord(), () => CanDeleteRecord);
+            ShowQRCodeCommand = new CommandHandler(() => ShowQRCode(), () => CanShowQRCode);
             GenerateRandomBase32KeyCommand = new CommandHandler(() => GenerateRandomBase32Key(), () => CanGenerateRandomBase32Key);
             RefreshRecordsCommand = new CommandHandler(() => InitData(), () => true);
         }
@@ -38,11 +42,15 @@ namespace OTPManager.Wpf.Views
 
         public ICommand DeleteRecordCommand { get; }
 
+        public ICommand ShowQRCodeCommand { get; }
+
         public ICommand GenerateRandomBase32KeyCommand { get; }
 
         public ICommand RefreshRecordsCommand { get; }
 
         public bool CanDeleteRecord => SelectedOtp is not null;
+
+        public bool CanShowQRCode => SelectedOtp is not null;
 
         public bool CanGenerateRandomBase32Key => SelectedOtp is not null;
 
@@ -121,7 +129,7 @@ namespace OTPManager.Wpf.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowExceptionMessage(ex);
                 }
             }
         }
@@ -145,7 +153,7 @@ namespace OTPManager.Wpf.Views
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                        ShowExceptionMessage(ex);
                     }
                 }
             }
@@ -168,10 +176,65 @@ namespace OTPManager.Wpf.Views
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                        ShowExceptionMessage(ex);
                     }
                 }
             }
+        }
+
+        private void ShowQRCode()
+        {
+            if (SelectedOtp is not null)
+            {
+                try
+                {
+                    var bitmapImage = GenerateQRCode("label", SelectedOtp.Base32SecretKey, "issuer");
+
+                    var window = new Window
+                    {
+                        Title = SelectedOtp.Description,
+                        Width = 500,
+                        Height = 500,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    };
+
+                    var grid = new Grid();
+                    grid.Children.Add(new Image { Source = bitmapImage });
+                    window.Content = grid;
+                    window.Show();
+                }
+                catch (Exception ex)
+                {
+                    ShowExceptionMessage(ex);
+                }
+            }
+        }
+
+        private static BitmapImage GenerateQRCode(string label, string secret, string issuer)
+        {
+            var payload = new PayloadGenerator.OneTimePassword()
+            {
+                Label = label,
+                Secret = secret,
+                Issuer = issuer,
+            };
+
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(payload.ToString(), QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new QRCode(qrCodeData);
+            using var qrCodeImage = qrCode.GetGraphic(20);
+
+            using var memory = new MemoryStream();
+            qrCodeImage.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+            memory.Position = 0;
+
+            var bitmapimage = new BitmapImage();
+            bitmapimage.BeginInit();
+            bitmapimage.StreamSource = memory;
+            bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapimage.EndInit();
+
+            return bitmapimage;
         }
 
         private void GenerateRandomBase32Key()
@@ -192,10 +255,19 @@ namespace OTPManager.Wpf.Views
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                        ShowExceptionMessage(ex);
                     }
                 }
             }
+        }
+
+        private static void ShowExceptionMessage(Exception ex)
+        {
+            _ = MessageBox.Show(
+                ex.Message,
+                ex.GetType().ToString(),
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
 
         private void OtpRefresh(object? sender, EventArgs e)
@@ -235,7 +307,7 @@ namespace OTPManager.Wpf.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowExceptionMessage(ex);
                 }
             }
         }
