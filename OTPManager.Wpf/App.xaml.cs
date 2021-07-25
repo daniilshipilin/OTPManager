@@ -94,7 +94,7 @@ namespace OTPManager.Wpf
                 return;
             }
 
-            if ((DateTime.UtcNow - AppSettings.UpdatesLastCheckedTimestamp).Days >= 1)
+            if ((DateTime.Now - AppSettings.UpdatesLastCheckedTimestamp).Days >= 1)
             {
                 try
                 {
