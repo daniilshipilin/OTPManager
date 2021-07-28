@@ -103,16 +103,10 @@ namespace OTPManager.Wpf
                     if (await updater.CheckUpdateIsAvailable())
                     {
                         var dr = MessageBox.Show(
-                            updater.UpdatePromptFormatted,
-                            "Program update required",
-                            MessageBoxButton.YesNo,
-                            MessageBoxImage.Question);
-
-                        if (dr == MessageBoxResult.Yes)
-                        {
-                            await updater.Update();
-                            Environment.Exit(0);
-                        }
+                            updater.GetUpdatePrompt(),
+                            "Program update",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
                     }
                 }
                 catch (Exception ex)
