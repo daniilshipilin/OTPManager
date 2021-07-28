@@ -188,7 +188,8 @@ namespace OTPManager.Wpf.Views
             {
                 try
                 {
-                    var bitmapImage = GenerateQRCode("label", SelectedOtp.Base32SecretKey, "issuer");
+                    var payload = GenerateQRPayload("label", SelectedOtp.Base32SecretKey, "issuer");
+                    var bitmapImage = GenerateQRCode(payload);
 
                     var window = new Window
                     {
@@ -210,15 +211,18 @@ namespace OTPManager.Wpf.Views
             }
         }
 
-        private static BitmapImage GenerateQRCode(string label, string secret, string issuer)
+        private static PayloadGenerator.OneTimePassword GenerateQRPayload(string label, string secret, string issuer)
         {
-            var payload = new PayloadGenerator.OneTimePassword()
+            return new PayloadGenerator.OneTimePassword()
             {
                 Label = label,
                 Secret = secret,
                 Issuer = issuer,
             };
+        }
 
+        private static BitmapImage GenerateQRCode(PayloadGenerator.OneTimePassword payload)
+        {
             using var qrGenerator = new QRCodeGenerator();
             using var qrCodeData = qrGenerator.CreateQrCode(payload.ToString(), QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new QRCode(qrCodeData);
