@@ -6,6 +6,12 @@ namespace OTPManager.Wpf.Models
 
     public class OtpKeysJSON
     {
+        [JsonProperty("filerevision")]
+        public static int FileRevision { get; set; }
+
+        [JsonProperty("filelastedittimestamp")]
+        public static int FileLastEditTimestamp { get; set; }
+
         [JsonProperty("otpentries")]
         public IList<OtpEntry> OtpEntries { get; set; } = new List<OtpEntry>();
 

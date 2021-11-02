@@ -24,7 +24,7 @@ namespace OTPManager.Wpf.Views
             InitializeComponent();
             DataContext = this;
 
-            SaveRecordCommand = new CommandHandler(() => SaveRecord(), () => true);
+            SaveRecordCommand = new CommandHandler(() => SaveRecord(), () => Otps.Count > 0);
             InsertRecordCommand = new CommandHandler(() => InsertRecord(), () => true);
             DeleteRecordCommand = new CommandHandler(() => DeleteRecord(), () => CanDeleteRecord);
             ShowQRCodeCommand = new CommandHandler(() => ShowQRCode(), () => CanShowQRCode);
@@ -93,6 +93,9 @@ namespace OTPManager.Wpf.Views
                 Otps.Add(otpKey);
             }
 
+            dbRevisionLabel.Content = OtpKeysJSON.FileRevision;
+            dbRevisionTimestampLabel.Content = TimestampHelper.UnixTimeStampToDateTime(OtpKeysJSON.FileLastEditTimestamp).ToString("s");
+
             // select first item
             if (Otps.Count > 0)
             {
@@ -112,6 +115,8 @@ namespace OTPManager.Wpf.Views
             otpRemainingSecondsTextBlock.Text = string.Empty;
             progressBar.Value = 0;
             totalRecordsLabel.Content = string.Empty;
+            dbRevisionLabel.Content = string.Empty;
+            dbRevisionTimestampLabel.Content = string.Empty;
         }
 
         private void InsertRecord()

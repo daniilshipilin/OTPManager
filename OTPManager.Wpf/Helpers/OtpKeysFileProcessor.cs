@@ -10,7 +10,7 @@ namespace OTPManager.Wpf.Helpers
 
     public static class OtpKeysFileProcessor
     {
-        private static readonly string OtpFilePath = Path.Combine(Environment.CurrentDirectory, "otpkeys");
+        private static readonly string OtpFilePath = Path.Combine(Environment.CurrentDirectory, "otpkeys.db");
 
         private static byte[] hashedPassword = new byte[32];
 
@@ -85,6 +85,9 @@ namespace OTPManager.Wpf.Helpers
                     });
                 }
             }
+
+            OtpKeysJSON.FileRevision++;
+            OtpKeysJSON.FileLastEditTimestamp = TimestampHelper.GetUnixTimestamp();
 
             byte[] textBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jsonObj));
             byte[] encryptedBytes = SymmetricEncryptDecrypt.Encrypt(textBytes, hashedPassword);
