@@ -1,10 +1,10 @@
 @echo off
 
-set "cert=C:\GitSources\CodeSign\Certificates\Illuminati_Software_Inc_Code_Sign.p12"
+set "cert=D:\GitSources\CodeSign\Certificates\Illuminati_Software_Inc_Code_Sign.p12"
 set "timestamp=http://timestamp.digicert.com"
 
 set "bin=.\bin"
-set "src=%bin%\Release\net5.0-windows"
+set "src=%bin%\Release\publish"
 
 signtool.exe sign /fd sha256 /a /f "%cert%" "%src%\OTPManager.exe"
 signtool.exe timestamp /tr "%timestamp%" /td sha256 "%src%\OTPManager.exe"
