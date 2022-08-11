@@ -1,76 +1,75 @@
-namespace OTPManager.Wpf.Views
+namespace OTPManager.Wpf.Views;
+
+using System;
+using System.Windows;
+using System.Windows.Input;
+using OTPManager.Wpf.Helpers;
+
+public partial class LoginView : Window
 {
-    using System;
-    using System.Windows;
-    using System.Windows.Input;
-    using OTPManager.Wpf.Helpers;
-
-    public partial class LoginView : Window
+    public LoginView()
     {
-        public LoginView()
-        {
-            InitializeComponent();
-        }
+        this.InitializeComponent();
+    }
 
-        private void Login()
+    private void Login()
+    {
+        try
         {
-            try
+            if (OtpKeysFileProcessor.TryReadFile())
             {
-                if (OtpKeysFileProcessor.TryReadFile())
-                {
-                    Close();
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    ex.Message,
-                    ex.GetType().ToString(),
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                this.Close();
                 return;
             }
-
-            MessageBox.Show(
-                "The given encryption password does not match the one currently in use. Please provide the current encryption password.",
-                "Login failed",
-                MessageBoxButton.OK,
-                MessageBoxImage.Exclamation);
         }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        catch (Exception ex)
         {
-            loginButton.IsEnabled = false;
-            passwordBox.Focus();
+            MessageBox.Show(
+                ex.Message,
+                ex.GetType().ToString(),
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return;
         }
 
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        MessageBox.Show(
+            "The given encryption password does not match the one currently in use. Please provide the current encryption password.",
+            "Login failed",
+            MessageBoxButton.OK,
+            MessageBoxImage.Exclamation);
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        this.loginButton.IsEnabled = false;
+        this.passwordBox.Focus();
+    }
+
+    private void LoginButton_Click(object sender, RoutedEventArgs e)
+    {
+        OtpKeysFileProcessor.SetPassword(passwordBox.Password);
+        this.Login();
+    }
+
+    private void Window_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            this.Close();
+        }
+    }
+
+    private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        this.loginButton.IsEnabled = !string.IsNullOrEmpty(passwordBox.Password);
+    }
+
+    private void PasswordBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && !string.IsNullOrEmpty(passwordBox.Password))
         {
             OtpKeysFileProcessor.SetPassword(passwordBox.Password);
-            Login();
-        }
-
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                Close();
-            }
-        }
-
-        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            loginButton.IsEnabled = !string.IsNullOrEmpty(passwordBox.Password);
-        }
-
-        private void PasswordBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && !string.IsNullOrEmpty(passwordBox.Password))
-            {
-                OtpKeysFileProcessor.SetPassword(passwordBox.Password);
-                Login();
-            }
+            this.Login();
         }
     }
 }

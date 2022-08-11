@@ -1,42 +1,41 @@
-namespace OTPManager.Wpf.Helpers
+namespace OTPManager.Wpf.Helpers;
+
+using System;
+using System.Windows.Input;
+
+public class CommandHandler : ICommand
 {
-    using System;
-    using System.Windows.Input;
+    private readonly Action action;
+    private readonly Func<bool> canExecute;
 
-    public class CommandHandler : ICommand
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CommandHandler"/> class.
+    /// </summary>
+    public CommandHandler(Action action, Func<bool> canExecute)
     {
-        private readonly Action action;
-        private readonly Func<bool> canExecute;
+        this.action = action;
+        this.canExecute = canExecute;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CommandHandler"/> class.
-        /// </summary>
-        public CommandHandler(Action action, Func<bool> canExecute)
-        {
-            this.action = action;
-            this.canExecute = canExecute;
-        }
+    /// <summary>
+    /// Wires CanExecuteChanged event.
+    /// </summary>
+    public event EventHandler? CanExecuteChanged
+    {
+        add { CommandManager.RequerySuggested += value; }
+        remove { CommandManager.RequerySuggested -= value; }
+    }
 
-        /// <summary>
-        /// Wires CanExecuteChanged event.
-        /// </summary>
-        public event EventHandler? CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
+    /// <summary>
+    /// Forcess checking if execute is allowed.
+    /// </summary>
+    public bool CanExecute(object? parameter)
+    {
+        return this.canExecute.Invoke();
+    }
 
-        /// <summary>
-        /// Forcess checking if execute is allowed.
-        /// </summary>
-        public bool CanExecute(object? parameter)
-        {
-            return canExecute.Invoke();
-        }
-
-        public void Execute(object? parameter)
-        {
-            action();
-        }
+    public void Execute(object? parameter)
+    {
+        this.action();
     }
 }

@@ -1,19 +1,15 @@
-namespace OTPManager.Wpf.Helpers
+namespace OTPManager.Wpf.Helpers;
+
+using System;
+
+public static class TimestampHelper
 {
-    using System;
+    public static int GetUnixTimestamp() => (int)((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
 
-    public static class TimestampHelper
+    public static DateTime UnixTimeStampToDateTime(int unixTimeStamp)
     {
-        public static int GetUnixTimestamp()
-        {
-            return (int)((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-        }
+        var dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
-        public static DateTime UnixTimeStampToDateTime(int unixTimeStamp)
-        {
-            var dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-
-            return dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime();
-        }
+        return dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime();
     }
 }

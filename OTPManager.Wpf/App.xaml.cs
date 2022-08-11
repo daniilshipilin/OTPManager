@@ -1,128 +1,107 @@
-namespace OTPManager.Wpf
+namespace OTPManager.Wpf;
+
+using System;
+using System.Threading.Tasks;
+using System.Windows;
+using ApplicationUpdater;
+using OTPManager.Wpf.Helpers;
+using OTPManager.Wpf.Views;
+
+public partial class App : Application
 {
-    using System;
-    using System.Threading.Tasks;
-    using System.Windows;
-    using ApplicationUpdater;
-    using OTPManager.Wpf.Helpers;
-    using OTPManager.Wpf.Views;
-
-    public partial class App : Application
+    private static void ShowLoginView()
     {
-        private IUpdater? updater;
+        var view = new LoginView();
+        view.ShowDialog();
+    }
 
-        private static void ShowLoginView()
+    private static void ShowOtpView()
+    {
+        var view = new OtpView();
+        view.ShowDialog();
+    }
+
+    private void ApplicationStartup(object sender, StartupEventArgs e)
+    {
+        AppSettings.CheckSettings();
+
+        if (e.Args.Length > 0)
         {
-            var view = new LoginView();
-            view.ShowDialog();
-        }
-
-        private static void ShowOtpView()
-        {
-            var view = new OtpView();
-            view.ShowDialog();
-        }
-
-        private void ApplicationStartup(object sender, StartupEventArgs e)
-        {
-            AppSettings.CheckSettings();
-
-            if (e.Args.Length > 0)
+            try
             {
-                try
+                if (e.Args[0].Equals("-p") && e.Args.Length == 3)
                 {
-                    if (e.Args[0].Equals("-p") && e.Args.Length == 3)
+                    if (OtpKeysFileProcessor.ChangeFileEncryptionPassword(e.Args[1], e.Args[2]))
                     {
-                        if (OtpKeysFileProcessor.ChangeFileEncryptionPassword(e.Args[1], e.Args[2]))
-                        {
-                            MessageBox.Show("Encryption password successfully changed");
-                        }
-                        else
-                        {
-                            MessageBox.Show("Encryption password change failed");
-                        }
+                        MessageBox.Show("Encryption password successfully changed");
                     }
                     else
                     {
-                        MessageBox.Show("Unknown args detected");
+                        MessageBox.Show("Encryption password change failed");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Unknown args detected");
                 }
-
-                Environment.Exit(0);
             }
-
-            // init program updater
-            InitUpdater();
-
-            // check for updates in the background
-            Task.Run(async () => await CheckUpdates());
-
-            ShowLoginView();
-
-            if (OtpKeysFileProcessor.LoginIsSuccessful)
+            catch (Exception ex)
             {
-                ShowOtpView();
+                MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             Environment.Exit(0);
         }
 
-        private void InitUpdater()
+        // check for updates in the background
+        Task.Run(async () => await CheckUpdates());
+
+        ShowLoginView();
+
+        if (OtpKeysFileProcessor.LoginIsSuccessful)
+        {
+            ShowOtpView();
+        }
+
+        Environment.Exit(0);
+    }
+
+    private static async Task CheckUpdates()
+    {
+        if ((DateTime.Now - AppSettings.UpdatesLastCheckedTimestamp).Days >= 1)
         {
             try
             {
-                updater = new Updater(
-                    ApplicationInfo.BaseDirectory,
-                    Version.Parse(GitVersionInformation.SemVer),
-                    ApplicationInfo.AppGUID,
-                    ApplicationInfo.ExePath);
+                var updater = new Updater(
+                ApplicationInfo.BaseDirectory,
+                Version.Parse(GitVersionInformation.SemVer),
+                ApplicationInfo.AppGUID,
+                ApplicationInfo.ExePath);
+
+                AppSettings.UpdateUpdatesLastCheckedTimestamp();
+
+                if (await updater.CheckUpdateIsAvailable())
+                {
+                    var dr = MessageBox.Show(
+                        updater.GetUpdatePrompt(),
+                        "Program update",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
                 ShowExceptionMessage(ex);
             }
         }
+    }
 
-        private async Task CheckUpdates()
-        {
-            if (updater is null)
-            {
-                return;
-            }
-
-            if ((DateTime.Now - AppSettings.UpdatesLastCheckedTimestamp).Days >= 1)
-            {
-                try
-                {
-                    AppSettings.UpdateUpdatesLastCheckedTimestamp();
-
-                    if (await updater.CheckUpdateIsAvailable())
-                    {
-                        var dr = MessageBox.Show(
-                            updater.GetUpdatePrompt(),
-                            "Program update",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ShowExceptionMessage(ex);
-                }
-            }
-        }
-
-        private static void ShowExceptionMessage(Exception ex)
-        {
-            MessageBox.Show(
-                ex.Message,
-                ex.GetType().ToString(),
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-        }
+    private static void ShowExceptionMessage(Exception ex)
+    {
+        MessageBox.Show(
+            ex.Message,
+            ex.GetType().ToString(),
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
     }
 }

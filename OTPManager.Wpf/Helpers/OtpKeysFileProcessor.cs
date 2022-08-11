@@ -1,108 +1,107 @@
-namespace OTPManager.Wpf.Helpers
+namespace OTPManager.Wpf.Helpers;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using Newtonsoft.Json;
+using OTPManager.Wpf.Models;
+
+public static class OtpKeysFileProcessor
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Security.Cryptography;
-    using System.Text;
-    using Newtonsoft.Json;
-    using OTPManager.Wpf.Models;
+    private static readonly string OtpFilePath = Path.Combine(Environment.CurrentDirectory, "otpkeys.db");
 
-    public static class OtpKeysFileProcessor
+    private static byte[] hashedPassword = new byte[32];
+
+    public static bool LoginIsSuccessful { get; private set; }
+
+    public static void SetPassword(string password)
     {
-        private static readonly string OtpFilePath = Path.Combine(Environment.CurrentDirectory, "otpkeys.db");
+        using var sha256 = SHA256.Create();
+        hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+    }
 
-        private static byte[] hashedPassword = new byte[32];
+    public static bool TryReadFile()
+    {
+        CheckOtpFileExists();
 
-        public static bool LoginIsSuccessful { get; private set; }
+        byte[] encryptedBytes = File.ReadAllBytes(OtpFilePath);
+        LoginIsSuccessful = SymmetricEncryptDecrypt.TryDecrypt(encryptedBytes, hashedPassword);
 
-        public static void SetPassword(string password)
+        return LoginIsSuccessful;
+    }
+
+    public static bool ChangeFileEncryptionPassword(string currentPassword, string newPassword)
+    {
+        SetPassword(currentPassword);
+
+        if (TryReadFile())
         {
-            using var sha256 = SHA256.Create();
-            hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            var data = LoadData();
+            SetPassword(newPassword);
+            SaveData(data);
         }
 
-        public static bool TryReadFile()
+        return LoginIsSuccessful;
+    }
+
+    public static IList<OtpObject> LoadData()
+    {
+        CheckOtpFileExists();
+
+        byte[] encryptedBytes = File.ReadAllBytes(OtpFilePath);
+        string json = Encoding.UTF8.GetString(SymmetricEncryptDecrypt.Decrypt(encryptedBytes, hashedPassword));
+        var jsonObj = JsonConvert.DeserializeObject<OtpKeysJSON>(json);
+        var otps = new List<OtpObject>();
+
+        if (jsonObj is not null)
         {
-            CheckOtpFileExists();
-
-            byte[] encryptedBytes = File.ReadAllBytes(OtpFilePath);
-            LoginIsSuccessful = SymmetricEncryptDecrypt.TryDecrypt(encryptedBytes, hashedPassword);
-
-            return LoginIsSuccessful;
-        }
-
-        public static bool ChangeFileEncryptionPassword(string currentPassword, string newPassword)
-        {
-            SetPassword(currentPassword);
-
-            if (TryReadFile())
+            foreach (var entry in jsonObj.OtpEntries)
             {
-                var data = LoadData();
-                SetPassword(newPassword);
-                SaveData(data);
+                otps.Add(new OtpObject(
+                    entry.Description,
+                    entry.Base32SecretKey,
+                    entry.LastEditTimestamp));
             }
-
-            return LoginIsSuccessful;
         }
 
-        public static IList<OtpObject> LoadData()
+        return otps;
+    }
+
+    public static void SaveData(IList<OtpObject>? otps)
+    {
+        var jsonObj = new OtpKeysJSON();
+
+        if (otps is not null)
         {
-            CheckOtpFileExists();
-
-            byte[] encryptedBytes = File.ReadAllBytes(OtpFilePath);
-            string json = Encoding.UTF8.GetString(SymmetricEncryptDecrypt.Decrypt(encryptedBytes, hashedPassword));
-            var jsonObj = JsonConvert.DeserializeObject<OtpKeysJSON>(json);
-            var otps = new List<OtpObject>();
-
-            if (jsonObj is not null)
+            foreach (var entry in otps)
             {
-                foreach (var entry in jsonObj.OtpEntries)
+                jsonObj.OtpEntries.Add(new OtpKeysJSON.OtpEntry()
                 {
-                    otps.Add(new OtpObject(
-                        entry.Description,
-                        entry.Base32SecretKey,
-                        entry.LastEditTimestamp));
-                }
+                    Description = entry.Description,
+                    Base32SecretKey = entry.Base32SecretKey,
+                    LastEditTimestamp = entry.LastEditTimestamp,
+                });
             }
-
-            return otps;
         }
 
-        public static void SaveData(IList<OtpObject>? otps)
+        OtpKeysJSON.FileRevision++;
+        OtpKeysJSON.FileLastEditTimestamp = TimestampHelper.GetUnixTimestamp();
+
+        byte[] textBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jsonObj));
+        byte[] encryptedBytes = SymmetricEncryptDecrypt.Encrypt(textBytes, hashedPassword);
+        File.WriteAllBytes(OtpFilePath, encryptedBytes);
+    }
+
+    private static void CheckOtpFileExists()
+    {
+        var info = new FileInfo(OtpFilePath);
+
+        if (!info.Exists || info.Length == 0)
         {
-            var jsonObj = new OtpKeysJSON();
-
-            if (otps is not null)
-            {
-                foreach (var entry in otps)
-                {
-                    jsonObj.OtpEntries.Add(new OtpKeysJSON.OtpEntry()
-                    {
-                        Description = entry.Description,
-                        Base32SecretKey = entry.Base32SecretKey,
-                        LastEditTimestamp = entry.LastEditTimestamp,
-                    });
-                }
-            }
-
-            OtpKeysJSON.FileRevision++;
-            OtpKeysJSON.FileLastEditTimestamp = TimestampHelper.GetUnixTimestamp();
-
-            byte[] textBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jsonObj));
-            byte[] encryptedBytes = SymmetricEncryptDecrypt.Encrypt(textBytes, hashedPassword);
-            File.WriteAllBytes(OtpFilePath, encryptedBytes);
-        }
-
-        private static void CheckOtpFileExists()
-        {
-            var info = new FileInfo(OtpFilePath);
-
-            if (!info.Exists || info.Length == 0)
-            {
-                // save file with no record entries
-                SaveData(null);
-            }
+            // save file with no record entries
+            SaveData(null);
         }
     }
 }
