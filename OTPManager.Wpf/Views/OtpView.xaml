@@ -161,7 +161,8 @@
             VerticalAlignment="Center"
             d:Text="selectedOtpBase32SecretKeyTextBox"
             FontFamily="Consolas"
-            TextAlignment="Left" />
+            TextAlignment="Left"
+            AcceptsReturn="True" />
 
         <StackPanel
             Grid.Row="3"

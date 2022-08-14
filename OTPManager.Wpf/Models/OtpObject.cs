@@ -41,7 +41,11 @@ public class OtpObject
 
         set
         {
-            string tmp = value.ToUpper().Replace(" ", string.Empty);
+            string tmp = value.ToUpper().Trim()
+            .Replace(" ", string.Empty)
+            .Replace("\r", string.Empty)
+            .Replace("\n", string.Empty)
+            .Replace("\t", string.Empty);
 
             if (!Base32SecretKeyIsValid(tmp))
             {
