@@ -12,6 +12,7 @@
     FontSize="16"
     Icon="/Images/2fa.ico"
     KeyDown="Window_KeyDown"
+    MouseDown="Window_MouseDown"
     Loaded="Window_Loaded"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">

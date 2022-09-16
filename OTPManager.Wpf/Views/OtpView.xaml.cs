@@ -16,8 +16,10 @@ using QRCoder;
 public partial class OtpView : Window
 {
     private readonly DispatcherTimer otpUpdateTimer = new();
+    private readonly DispatcherTimer checkLastInputTimer = new();
     private readonly DispatcherTimer infoMessageResetTimer = new();
     private bool infoMessageIsNew;
+    private DateTime lastInput = DateTime.UtcNow;
 
     public OtpView()
     {
@@ -62,6 +64,10 @@ public partial class OtpView : Window
         this.infoMessageResetTimer.Interval = TimeSpan.FromSeconds(5);
         this.infoMessageResetTimer.Tick += this.ResetInfoMessage;
         this.infoMessageResetTimer.Start();
+
+        this.checkLastInputTimer.Interval = TimeSpan.FromSeconds(1);
+        this.checkLastInputTimer.Tick += this.CheckLastInput;
+        this.checkLastInputTimer.Start();
     }
 
     private void ResetInfoMessage(object? sender, EventArgs e)
@@ -73,6 +79,25 @@ public partial class OtpView : Window
         else
         {
             this.infoMessageIsNew = false;
+        }
+    }
+
+    private void CheckLastInput(object? sender, EventArgs e)
+    {
+        if (DateTime.UtcNow.Subtract(this.lastInput) > TimeSpan.FromMinutes(1))
+        {
+            this.Close();
+        }
+    }
+
+    private void OtpRefresh(object? sender, EventArgs e)
+    {
+        if (this.SelectedOtp is not null)
+        {
+            int totpHalfSize = this.SelectedOtp.TotpSize / 2;
+            this.otpValueTextBlock.Text = $"{this.SelectedOtp.TotpValue[0..totpHalfSize]} {this.SelectedOtp.TotpValue[totpHalfSize..]}";
+            this.otpRemainingSecondsTextBlock.Text = $"{this.SelectedOtp.RemainingSeconds} sec.";
+            this.progressBar.Value = (this.SelectedOtp.TimeWindowStep - this.SelectedOtp.RemainingSeconds) / (double)this.SelectedOtp.TimeWindowStep * 100;
         }
     }
 
@@ -279,17 +304,6 @@ public partial class OtpView : Window
             MessageBoxImage.Error);
     }
 
-    private void OtpRefresh(object? sender, EventArgs e)
-    {
-        if (this.SelectedOtp is not null)
-        {
-            int totpHalfSize = this.SelectedOtp.TotpSize / 2;
-            this.otpValueTextBlock.Text = $"{this.SelectedOtp.TotpValue[0..totpHalfSize]} {this.SelectedOtp.TotpValue[totpHalfSize..]}";
-            this.otpRemainingSecondsTextBlock.Text = $"{this.SelectedOtp.RemainingSeconds} sec.";
-            this.progressBar.Value = (this.SelectedOtp.TimeWindowStep - this.SelectedOtp.RemainingSeconds) / (double)this.SelectedOtp.TimeWindowStep * 100;
-        }
-    }
-
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
         this.InitData();
@@ -303,6 +317,13 @@ public partial class OtpView : Window
         {
             this.Close();
         }
+
+        this.lastInput = DateTime.UtcNow;
+    }
+
+    private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        this.lastInput = DateTime.UtcNow;
     }
 
     private void OtpValueTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
