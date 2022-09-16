@@ -37,6 +37,8 @@ public partial class LoginView : Window
             "Login failed",
             MessageBoxButton.OK,
             MessageBoxImage.Exclamation);
+
+        this.passwordBox.Clear();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
