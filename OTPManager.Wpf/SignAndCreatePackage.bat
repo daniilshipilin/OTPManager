@@ -1,6 +1,6 @@
 @echo off
 
-set "cert=D:\GitSources\CodeSign\Certificates\Illuminati_Software_Inc_Code_Sign.p12"
+set "cert=%CodesignCertPath%"
 set "timestamp=http://timestamp.digicert.com"
 
 set "bin=.\bin"
