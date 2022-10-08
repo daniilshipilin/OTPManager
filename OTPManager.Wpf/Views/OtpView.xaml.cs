@@ -13,13 +13,14 @@ using OTPManager.Wpf.Helpers;
 using OTPManager.Wpf.Models;
 using QRCoder;
 
-public partial class OtpView : Window
+public partial class OtpView : Window, IDisposable
 {
     private readonly DispatcherTimer otpUpdateTimer = new();
     private readonly DispatcherTimer checkLastInputTimer = new();
     private readonly DispatcherTimer infoMessageResetTimer = new();
     private bool infoMessageIsNew;
     private DateTime lastInput = DateTime.UtcNow;
+    private bool disposedValue;
 
     public OtpView()
     {
@@ -68,6 +69,18 @@ public partial class OtpView : Window
         this.checkLastInputTimer.Interval = TimeSpan.FromSeconds(1);
         this.checkLastInputTimer.Tick += this.CheckLastInput;
         this.checkLastInputTimer.Start();
+    }
+
+    private void StopTimers()
+    {
+        this.otpUpdateTimer.Stop();
+        this.otpUpdateTimer.Tick -= this.OtpRefresh;
+
+        this.infoMessageResetTimer.Stop();
+        this.infoMessageResetTimer.Tick -= this.ResetInfoMessage;
+
+        this.checkLastInputTimer.Stop();
+        this.checkLastInputTimer.Tick -= this.CheckLastInput;
     }
 
     private void ResetInfoMessage(object? sender, EventArgs e)
@@ -349,5 +362,35 @@ public partial class OtpView : Window
             this.selectedOtpDescriptionTextBox.Text = this.SelectedOtp.Description;
             this.selectedOtpBase32SecretKeyTextBox.Text = this.SelectedOtp.Base32SecretKey;
         }
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!this.disposedValue)
+        {
+            if (disposing)
+            {
+                // TODO: dispose managed state (managed objects)
+                this.StopTimers();
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            this.disposedValue = true;
+        }
+    }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~OtpView()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        this.Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

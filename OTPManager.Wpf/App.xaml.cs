@@ -9,18 +9,6 @@ using OTPManager.Wpf.Views;
 
 public partial class App : Application
 {
-    private static void ShowLoginView()
-    {
-        var view = new LoginView();
-        view.ShowDialog();
-    }
-
-    private static void ShowOtpView()
-    {
-        var view = new OtpView();
-        view.ShowDialog();
-    }
-
     private void ApplicationStartup(object sender, StartupEventArgs e)
     {
         AppSettings.CheckSettings();
@@ -56,11 +44,20 @@ public partial class App : Application
         // check for updates in the background
         Task.Run(async () => await CheckUpdates());
 
-        ShowLoginView();
-
-        if (OtpKeysFileProcessor.LoginIsSuccessful)
+        while (true)
         {
-            ShowOtpView();
+            using var loginView = new LoginView();
+            loginView.ShowDialog();
+
+            if (loginView.LoginIsSuccessful)
+            {
+                using var otpView = new OtpView();
+                otpView.ShowDialog();
+            }
+            else
+            {
+                break;
+            }
         }
 
         Environment.Exit(0);

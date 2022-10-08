@@ -22,6 +22,11 @@ public static class OtpKeysFileProcessor
         hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
     }
 
+    public static void ResetPassword()
+    {
+        hashedPassword = new byte[32];
+    }
+
     public static bool TryReadFile()
     {
         CheckOtpFileExists();
