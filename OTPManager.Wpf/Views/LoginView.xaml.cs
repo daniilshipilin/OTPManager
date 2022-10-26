@@ -14,14 +14,14 @@ public partial class LoginView : Window, IDisposable
     public LoginView()
     {
         this.InitializeComponent();
-        OtpKeysFileProcessor.ResetPassword();
+        OtpKeysProcessor.ResetPassword();
     }
 
     private void Login()
     {
         try
         {
-            if (OtpKeysFileProcessor.TryReadFile())
+            if (OtpKeysProcessor.TryParseOtpKeys())
             {
                 this.LoginIsSuccessful = true;
                 this.Close();
@@ -55,7 +55,7 @@ public partial class LoginView : Window, IDisposable
 
     private void LoginButton_Click(object sender, RoutedEventArgs e)
     {
-        OtpKeysFileProcessor.SetPassword(this.passwordBox.Password);
+        OtpKeysProcessor.SetPassword(this.passwordBox.Password);
         this.Login();
     }
 
@@ -76,7 +76,7 @@ public partial class LoginView : Window, IDisposable
     {
         if (e.Key == Key.Enter && !string.IsNullOrEmpty(this.passwordBox.Password))
         {
-            OtpKeysFileProcessor.SetPassword(this.passwordBox.Password);
+            OtpKeysProcessor.SetPassword(this.passwordBox.Password);
             this.Login();
         }
     }

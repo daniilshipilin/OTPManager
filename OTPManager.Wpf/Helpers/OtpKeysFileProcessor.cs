@@ -8,7 +8,7 @@ using System.Text;
 using Newtonsoft.Json;
 using OTPManager.Wpf.Models;
 
-public static class OtpKeysFileProcessor
+public static class OtpKeysProcessor
 {
     private static readonly string OtpFilePath = Path.Combine(Environment.CurrentDirectory, "otpkeys.db");
 
@@ -27,21 +27,21 @@ public static class OtpKeysFileProcessor
         hashedPassword = new byte[32];
     }
 
-    public static bool TryReadFile()
+    public static bool TryParseOtpKeys()
     {
-        CheckOtpFileExists();
+        CheckOtpKeysValid();
 
-        byte[] encryptedBytes = File.ReadAllBytes(OtpFilePath);
+        byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
         LoginIsSuccessful = SymmetricEncryptDecrypt.TryDecrypt(encryptedBytes, hashedPassword);
 
         return LoginIsSuccessful;
     }
 
-    public static bool ChangeFileEncryptionPassword(string currentPassword, string newPassword)
+    public static bool ChangeEncryptionPassword(string currentPassword, string newPassword)
     {
         SetPassword(currentPassword);
 
-        if (TryReadFile())
+        if (TryParseOtpKeys())
         {
             var data = LoadData();
             SetPassword(newPassword);
@@ -53,9 +53,9 @@ public static class OtpKeysFileProcessor
 
     public static IList<OtpObject> LoadData()
     {
-        CheckOtpFileExists();
+        CheckOtpKeysValid();
 
-        byte[] encryptedBytes = File.ReadAllBytes(OtpFilePath);
+        byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
         string json = Encoding.UTF8.GetString(SymmetricEncryptDecrypt.Decrypt(encryptedBytes, hashedPassword));
         var jsonObj = JsonConvert.DeserializeObject<OtpKeysJSON>(json);
         var otps = new List<OtpObject>();
@@ -96,14 +96,19 @@ public static class OtpKeysFileProcessor
 
         byte[] textBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jsonObj));
         byte[] encryptedBytes = SymmetricEncryptDecrypt.Encrypt(textBytes, hashedPassword);
-        File.WriteAllBytes(OtpFilePath, encryptedBytes);
+        AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
     }
 
-    private static void CheckOtpFileExists()
+    private static void CheckOtpKeysValid()
     {
-        var info = new FileInfo(OtpFilePath);
+        if (File.Exists(OtpFilePath))
+        {
+            byte[] encryptedBytes = File.ReadAllBytes(OtpFilePath);
+            AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
+            File.Move(OtpFilePath, OtpFilePath + ".backup");
+        }
 
-        if (!info.Exists || info.Length == 0)
+        if (string.IsNullOrEmpty(AppSettings.OtpKeys))
         {
             // save file with no record entries
             SaveData(null);

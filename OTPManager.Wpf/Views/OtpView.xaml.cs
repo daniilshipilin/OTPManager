@@ -126,7 +126,7 @@ public partial class OtpView : Window, IDisposable
         this.ClearTextBoxes();
         this.Otps.Clear();
 
-        foreach (var otpKey in OtpKeysFileProcessor.LoadData().OrderBy(x => x.Description))
+        foreach (var otpKey in OtpKeysProcessor.LoadData().OrderBy(x => x.Description))
         {
             this.Otps.Add(otpKey);
         }
@@ -166,7 +166,7 @@ public partial class OtpView : Window, IDisposable
             try
             {
                 this.Otps.Add(OtpObject.GetRandomOtpObject());
-                OtpKeysFileProcessor.SaveData(this.Otps);
+                OtpKeysProcessor.SaveData(this.Otps);
                 this.PrintInfoMessage("Record added");
                 this.InitData();
             }
@@ -190,7 +190,7 @@ public partial class OtpView : Window, IDisposable
                     this.SelectedOtp.Description = this.selectedOtpDescriptionTextBox.Text;
                     this.SelectedOtp.Base32SecretKey = this.selectedOtpBase32SecretKeyTextBox.Text;
                     this.SelectedOtp.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
-                    OtpKeysFileProcessor.SaveData(this.Otps);
+                    OtpKeysProcessor.SaveData(this.Otps);
                     this.PrintInfoMessage("Record updated");
                     this.InitData();
                 }
@@ -213,7 +213,7 @@ public partial class OtpView : Window, IDisposable
                 try
                 {
                     this.Otps.Remove(this.SelectedOtp);
-                    OtpKeysFileProcessor.SaveData(this.Otps);
+                    OtpKeysProcessor.SaveData(this.Otps);
                     this.PrintInfoMessage("Record deleted");
                     this.InitData();
                 }
@@ -296,7 +296,7 @@ public partial class OtpView : Window, IDisposable
                 {
                     this.SelectedOtp.Base32SecretKey = OtpObject.GetRandomBase32String();
                     this.SelectedOtp.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
-                    OtpKeysFileProcessor.SaveData(this.Otps);
+                    OtpKeysProcessor.SaveData(this.Otps);
                     this.PrintInfoMessage("Base32 secret key generated");
                     this.InitData();
                 }

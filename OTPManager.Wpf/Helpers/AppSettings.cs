@@ -16,7 +16,7 @@ public static class AppSettings
         RegistryBaseKey + "\\OTPManager";
 #endif
 
-    public const int CurrentConfigVersion = 1;
+    public const int CurrentConfigVersion = 2;
 
     private static readonly RegistryKey RegKeyOTPManager = Registry.CurrentUser.CreateSubKey(RegistryOTPManagerKey);
 
@@ -24,6 +24,7 @@ public static class AppSettings
     {
         { nameof(ConfigVersion), CurrentConfigVersion },
         { nameof(UpdatesLastCheckedTimestamp), default(DateTime).ToString("s") },
+        { nameof(OtpKeys), string.Empty },
     };
 
     public static int? ConfigVersion
@@ -38,6 +39,13 @@ public static class AppSettings
         get => DateTime.ParseExact((string?)RegKeyOTPManager.GetValue(nameof(UpdatesLastCheckedTimestamp)) ?? string.Empty, "s", CultureInfo.InvariantCulture);
 
         private set => RegKeyOTPManager.SetValue(nameof(UpdatesLastCheckedTimestamp), value.ToString("s", CultureInfo.InvariantCulture));
+    }
+
+    public static string OtpKeys
+    {
+        get => (string?)RegKeyOTPManager.GetValue(nameof(OtpKeys)) ?? string.Empty;
+
+        set => RegKeyOTPManager.SetValue(nameof(OtpKeys), value ?? string.Empty);
     }
 
     public static void UpdateUpdatesLastCheckedTimestamp() => UpdatesLastCheckedTimestamp = DateTime.Now;

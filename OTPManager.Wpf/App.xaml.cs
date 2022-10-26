@@ -19,7 +19,7 @@ public partial class App : Application
             {
                 if (e.Args[0].Equals("-p") && e.Args.Length == 3)
                 {
-                    if (OtpKeysFileProcessor.ChangeFileEncryptionPassword(e.Args[1], e.Args[2]))
+                    if (OtpKeysProcessor.ChangeEncryptionPassword(e.Args[1], e.Args[2]))
                     {
                         MessageBox.Show("Encryption password successfully changed");
                     }
