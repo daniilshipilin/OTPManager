@@ -68,9 +68,7 @@ public partial class LoginView : Window, IDisposable
     }
 
     private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
-    {
-        this.loginButton.IsEnabled = !string.IsNullOrEmpty(this.passwordBox.Password);
-    }
+        => this.loginButton.IsEnabled = !string.IsNullOrEmpty(this.passwordBox.Password);
 
     private void PasswordBox_KeyDown(object sender, KeyEventArgs e)
     {

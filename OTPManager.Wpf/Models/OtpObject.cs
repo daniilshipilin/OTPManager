@@ -80,9 +80,7 @@ public class OtpObject
     public string TotpValue => this.totp?.ComputeTotp() ?? string.Empty;
 
     public static OtpObject GetRandomOtpObject()
-    {
-        return new OtpObject("_NewOtpKey", GetRandomBase32String());
-    }
+        => new OtpObject("_NewOtpKey", GetRandomBase32String());
 
     public static string GetRandomBase32String(int length = 32)
     {
@@ -98,7 +96,7 @@ public class OtpObject
 
     private static bool Base32SecretKeyIsValid(string base32SecretKey)
     {
-        foreach (var item in base32SecretKey)
+        foreach (char item in base32SecretKey)
         {
             if (!Base32Charset.Contains(item))
             {

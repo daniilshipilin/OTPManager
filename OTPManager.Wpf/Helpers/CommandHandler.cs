@@ -22,20 +22,16 @@ public class CommandHandler : ICommand
     /// </summary>
     public event EventHandler? CanExecuteChanged
     {
-        add { CommandManager.RequerySuggested += value; }
-        remove { CommandManager.RequerySuggested -= value; }
+        add => CommandManager.RequerySuggested += value;
+        remove => CommandManager.RequerySuggested -= value;
     }
 
     /// <summary>
     /// Forcess checking if execute is allowed.
     /// </summary>
     public bool CanExecute(object? parameter)
-    {
-        return this.canExecute.Invoke();
-    }
+        => this.canExecute.Invoke();
 
     public void Execute(object? parameter)
-    {
-        this.action();
-    }
+        => this.action();
 }

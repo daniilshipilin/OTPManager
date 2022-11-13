@@ -335,9 +335,7 @@ public partial class OtpView : Window, IDisposable
     }
 
     private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-    {
-        this.lastInput = DateTime.UtcNow;
-    }
+        => this.lastInput = DateTime.UtcNow;
 
     private void OtpValueTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {

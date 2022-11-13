@@ -23,9 +23,7 @@ public static class OtpKeysProcessor
     }
 
     public static void ResetPassword()
-    {
-        hashedPassword = new byte[32];
-    }
+        => hashedPassword = new byte[32];
 
     public static bool TryParseOtpKeys()
     {
