@@ -3,11 +3,12 @@ namespace OTPManager.Wpf.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using Microsoft.Win32;
 
 public static class AppSettings
 {
-    public const string RegistryBaseKey = @"SOFTWARE\Illuminati Software Inc.";
+    public const string RegistryBaseKey = @"Software\Illuminati Software Inc.";
 
     public const string RegistryOTPManagerKey =
 #if DEBUG
@@ -68,6 +69,17 @@ public static class AppSettings
         {
             RegKeyOTPManager.SetValue(pair.Key, pair.Value);
         }
+    }
+
+    public static string ExportOtpKeysRegValue()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Windows Registry Editor Version 5.00");
+        sb.AppendLine(string.Empty);
+        sb.AppendLine($"[{RegKeyOTPManager.Name}]");
+        sb.AppendLine($"\"{nameof(OtpKeys)}\"=\"{OtpKeys}\"");
+        sb.AppendLine();
+        return sb.ToString();
     }
 
     private static void ClearRegistryKey(RegistryKey regKey)

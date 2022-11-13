@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Microsoft.Win32;
 using OTPManager.Wpf.Helpers;
 using OTPManager.Wpf.Models;
 using QRCoder;
@@ -27,12 +28,12 @@ public partial class OtpView : Window, IDisposable
         this.InitializeComponent();
         this.DataContext = this;
 
-        this.SaveRecordCommand = new CommandHandler(() => this.SaveRecord(), () => this.Otps.Count > 0);
-        this.InsertRecordCommand = new CommandHandler(() => this.InsertRecord(), () => true);
-        this.DeleteRecordCommand = new CommandHandler(() => this.DeleteRecord(), () => this.CanDeleteRecord);
-        this.ShowQRCodeCommand = new CommandHandler(() => this.ShowQRCode(), () => this.CanShowQRCode);
-        this.GenerateRandomBase32KeyCommand = new CommandHandler(() => this.GenerateRandomBase32Key(), () => this.CanGenerateRandomBase32Key);
-        this.RefreshRecordsCommand = new CommandHandler(() => this.InitData(), () => true);
+        this.SaveRecordCommand = new CommandHandler(this.SaveRecord, canExecute: () => this.Otps.Count > 0);
+        this.InsertRecordCommand = new CommandHandler(this.InsertRecord, canExecute: () => true);
+        this.DeleteRecordCommand = new CommandHandler(this.DeleteRecord, canExecute: () => this.CanDeleteRecord);
+        this.ShowQRCodeCommand = new CommandHandler(this.ShowQRCode, canExecute: () => this.CanShowQRCode);
+        this.GenerateRandomBase32KeyCommand = new CommandHandler(this.GenerateRandomBase32Key, canExecute: () => this.CanGenerateRandomBase32Key);
+        this.ExportOtpKeysCommand = new CommandHandler(this.ExportOtpKeys, canExecute: () => true);
     }
 
     public ObservableCollection<OtpObject> Otps { get; set; } = new ObservableCollection<OtpObject>();
@@ -49,7 +50,7 @@ public partial class OtpView : Window, IDisposable
 
     public ICommand GenerateRandomBase32KeyCommand { get; }
 
-    public ICommand RefreshRecordsCommand { get; }
+    public ICommand ExportOtpKeysCommand { get; }
 
     public bool CanDeleteRecord => this.SelectedOtp is not null;
 
@@ -59,7 +60,7 @@ public partial class OtpView : Window, IDisposable
 
     private void SetupTimers()
     {
-        this.otpUpdateTimer.Interval = TimeSpan.FromMilliseconds(250);
+        this.otpUpdateTimer.Interval = TimeSpan.FromSeconds(1);
         this.otpUpdateTimer.Tick += this.OtpRefresh;
 
         this.infoMessageResetTimer.Interval = TimeSpan.FromSeconds(5);
@@ -143,6 +144,30 @@ public partial class OtpView : Window, IDisposable
             this.totalRecordsLabel.Content = this.Otps.Count;
             this.otpUpdateTimer.Start();
         }
+    }
+
+    private void ExportOtpKeys()
+    {
+        this.checkLastInputTimer.Stop();
+
+        string otpKeysReg = AppSettings.ExportOtpKeysRegValue();
+        var saveFileDialog = new SaveFileDialog()
+        {
+            FileName = "OtpKeys",
+            InitialDirectory = Environment.CurrentDirectory,
+            Filter = "Registry file (*.reg)|*.reg",
+        };
+
+        bool? result = saveFileDialog.ShowDialog();
+
+        if (result.HasValue && result.Value)
+        {
+            File.WriteAllText(saveFileDialog.FileName, otpKeysReg);
+            MessageBox.Show($"Otp keys successfully exported to '{saveFileDialog.FileName}'", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        this.lastInput = DateTime.UtcNow;
+        this.checkLastInputTimer.Start();
     }
 
     private void ClearTextBoxes()
@@ -359,6 +384,7 @@ public partial class OtpView : Window, IDisposable
         {
             this.selectedOtpDescriptionTextBox.Text = this.SelectedOtp.Description;
             this.selectedOtpBase32SecretKeyTextBox.Text = this.SelectedOtp.Base32SecretKey;
+            this.OtpRefresh(this, null!);
         }
     }
 

@@ -217,11 +217,11 @@
                 Content="Random" />
 
             <Button
-                x:Name="refreshButton"
+                x:Name="exportOtpKeysButton"
                 Width="70"
                 Margin="0,0,5,0"
-                Command="{Binding RefreshRecordsCommand}"
-                Content="Refresh" />
+                Command="{Binding ExportOtpKeysCommand}"
+                Content="Export" />
 
         </StackPanel>
 
