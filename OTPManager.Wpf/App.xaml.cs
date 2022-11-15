@@ -42,11 +42,11 @@ public partial class App : Application
         }
 
         // check for updates in the background
-        Task.Run(async () => await CheckUpdates());
+        Task.Run(CheckUpdates);
 
         while (true)
         {
-            using var loginView = new LoginView();
+            var loginView = new LoginView();
             loginView.ShowDialog();
 
             if (loginView.LoginIsSuccessful)

@@ -5,16 +5,13 @@ using System.Windows;
 using System.Windows.Input;
 using OTPManager.Wpf.Helpers;
 
-public partial class LoginView : Window, IDisposable
+public partial class LoginView : Window
 {
-    private bool disposedValue;
-
     public bool LoginIsSuccessful { get; private set; }
 
     public LoginView()
     {
         this.InitializeComponent();
-        OtpKeysProcessor.ResetPassword();
     }
 
     private void Login()
@@ -78,34 +75,5 @@ public partial class LoginView : Window, IDisposable
             OtpKeysProcessor.SetPassword(this.passwordBox.Password);
             this.Login();
         }
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!this.disposedValue)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            this.disposedValue = true;
-        }
-    }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~LoginView()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        this.Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }
