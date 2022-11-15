@@ -45,6 +45,7 @@ public partial class LoginView : Window, IDisposable
             MessageBoxImage.Exclamation);
 
         this.passwordBox.Clear();
+        OtpKeysProcessor.ResetPassword();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)

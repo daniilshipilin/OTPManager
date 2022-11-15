@@ -2,7 +2,6 @@ namespace OTPManager.Wpf.Helpers;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
@@ -10,27 +9,29 @@ using OTPManager.Wpf.Models;
 
 public static class OtpKeysProcessor
 {
-    private static readonly string OtpFilePath = Path.Combine(Environment.CurrentDirectory, "otpkeys.db");
-
-    private static byte[] hashedPassword = new byte[32];
+    private static SymmetricEncryption encryption = new SymmetricEncryption();
 
     public static bool LoginIsSuccessful { get; private set; }
 
     public static void SetPassword(string password)
     {
         using var sha256 = SHA256.Create();
-        hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        byte[] hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(password))[0..32];
+        encryption = new SymmetricEncryption(hashedPassword);
     }
 
     public static void ResetPassword()
-        => hashedPassword = new byte[32];
+    {
+        encryption.Dispose();
+        encryption = new SymmetricEncryption();
+    }
 
     public static bool TryParseOtpKeys()
     {
         CheckOtpKeysValid();
 
         byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
-        LoginIsSuccessful = SymmetricEncryptDecrypt.TryDecrypt(encryptedBytes, hashedPassword);
+        LoginIsSuccessful = encryption.TryDecrypt(encryptedBytes, out _);
 
         return LoginIsSuccessful;
     }
@@ -49,12 +50,12 @@ public static class OtpKeysProcessor
         return LoginIsSuccessful;
     }
 
-    public static IList<OtpObject> LoadData()
+    public static IEnumerable<OtpObject> LoadData()
     {
         CheckOtpKeysValid();
 
         byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
-        string json = Encoding.UTF8.GetString(SymmetricEncryptDecrypt.Decrypt(encryptedBytes, hashedPassword));
+        string json = Encoding.UTF8.GetString(encryption.Decrypt(encryptedBytes));
         var jsonObj = JsonConvert.DeserializeObject<OtpKeysJSON>(json);
         var otps = new List<OtpObject>();
 
@@ -72,7 +73,7 @@ public static class OtpKeysProcessor
         return otps;
     }
 
-    public static void SaveData(IList<OtpObject>? otps)
+    public static void SaveData(IEnumerable<OtpObject> otps)
     {
         var jsonObj = new OtpKeysJSON();
 
@@ -93,23 +94,16 @@ public static class OtpKeysProcessor
         OtpKeysJSON.FileLastEditTimestamp = TimestampHelper.GetUnixTimestamp();
 
         byte[] textBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jsonObj));
-        byte[] encryptedBytes = SymmetricEncryptDecrypt.Encrypt(textBytes, hashedPassword);
+        byte[] encryptedBytes = encryption.Encrypt(textBytes);
         AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
     }
 
     private static void CheckOtpKeysValid()
     {
-        if (File.Exists(OtpFilePath))
-        {
-            byte[] encryptedBytes = File.ReadAllBytes(OtpFilePath);
-            AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
-            File.Move(OtpFilePath, OtpFilePath + ".backup");
-        }
-
         if (string.IsNullOrEmpty(AppSettings.OtpKeys))
         {
             // save file with no record entries
-            SaveData(null);
+            SaveData(new List<OtpObject>());
         }
     }
 }
