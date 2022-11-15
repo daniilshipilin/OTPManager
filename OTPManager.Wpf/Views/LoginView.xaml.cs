@@ -47,6 +47,7 @@ public partial class LoginView : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        this.Title = ApplicationInfo.AppHeader;
         this.loginButton.IsEnabled = false;
         this.passwordBox.Focus();
     }
