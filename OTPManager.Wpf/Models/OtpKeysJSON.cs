@@ -1,29 +1,28 @@
 namespace OTPManager.Wpf.Models;
 
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json.Serialization;
 
 public class OtpKeysJSON
 {
-    [JsonProperty("filerevision")]
+    [JsonPropertyName("filerevision")]
     public static int FileRevision { get; set; }
 
-    [JsonProperty("filelastedittimestamp")]
+    [JsonPropertyName("filelastedittimestamp")]
     public static int FileLastEditTimestamp { get; set; }
 
-    [JsonProperty("otpentries")]
+    [JsonPropertyName("otpentries")]
     public IList<OtpEntry> OtpEntries { get; set; } = new List<OtpEntry>();
 
     public class OtpEntry
     {
-        [JsonProperty("description")]
+        [JsonPropertyName("description")]
         public string Description { get; set; } = string.Empty;
 
-        [JsonProperty("base32secretkey")]
+        [JsonPropertyName("base32secretkey")]
         public string Base32SecretKey { get; set; } = string.Empty;
 
-        [JsonProperty("lastedittimestamp")]
+        [JsonPropertyName("lastedittimestamp")]
         public int LastEditTimestamp { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
 using OTPManager.Wpf.Models;
 
 public static class OtpKeysProcessor
@@ -56,7 +56,7 @@ public static class OtpKeysProcessor
 
         byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
         string json = Encoding.UTF8.GetString(encryption.Decrypt(encryptedBytes));
-        var jsonObj = JsonConvert.DeserializeObject<OtpKeysJSON>(json);
+        var jsonObj = JsonSerializer.Deserialize<OtpKeysJSON>(json);
         var otps = new List<OtpObject>();
 
         if (jsonObj is not null)
@@ -93,7 +93,7 @@ public static class OtpKeysProcessor
         OtpKeysJSON.FileRevision++;
         OtpKeysJSON.FileLastEditTimestamp = TimestampHelper.GetUnixTimestamp();
 
-        byte[] textBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jsonObj));
+        byte[] textBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonObj));
         byte[] encryptedBytes = encryption.Encrypt(textBytes);
         AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
     }
