@@ -42,7 +42,7 @@ public partial class App : Application
         }
 
         // check for updates in the background
-        Task.Run(CheckUpdates);
+        var updateTask = Task.Run(CheckUpdates);
 
         while (true)
         {
@@ -58,6 +58,11 @@ public partial class App : Application
             {
                 break;
             }
+        }
+
+        if (!updateTask.IsCompleted)
+        {
+            updateTask.Wait();
         }
 
         Environment.Exit(0);
@@ -82,8 +87,14 @@ public partial class App : Application
                     var dr = MessageBox.Show(
                         updater.GetUpdatePrompt(),
                         "Program update",
-                        MessageBoxButton.OK,
+                        MessageBoxButton.YesNo,
                         MessageBoxImage.Information);
+
+                    if (dr == MessageBoxResult.Yes)
+                    {
+                        await updater.Update();
+                        Environment.Exit(0);
+                    }
                 }
             }
             catch (Exception ex)
