@@ -90,8 +90,8 @@ public static class OtpKeysProcessor
             }
         }
 
-        OtpKeysJSON.FileRevision++;
-        OtpKeysJSON.FileLastEditTimestamp = TimestampHelper.GetUnixTimestamp();
+        OtpKeysJSON.Revision++;
+        OtpKeysJSON.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
 
         byte[] textBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonObj));
         byte[] encryptedBytes = encryption.Encrypt(textBytes);
