@@ -71,7 +71,7 @@ public partial class App : Application
             {
                 var updater = new Updater(
                 ApplicationInfo.BaseDirectory,
-                Version.Parse(GitVersionInformation.SemVer),
+                ApplicationInfo.AppVersion,
                 ApplicationInfo.AppGUID,
                 ApplicationInfo.ExePath);
 

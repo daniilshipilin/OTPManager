@@ -22,6 +22,13 @@ public static class ApplicationInfo
         "";
 #endif
 
+    private const string VersionOverride =
+#if DEBUG
+        "";
+#else
+        "";
+#endif
+
     public static IList<string>? Args { get; private set; }
 
     public static string BaseDirectory => Path.GetDirectoryName(ExePath) ?? string.Empty;
@@ -32,7 +39,9 @@ public static class ApplicationInfo
 
     public static string AppProduct { get; } = Product?.Product ?? string.Empty;
 
-    public static string AppHeader { get; } = $"{AppTitle} v{GitVersionInformation.SemVer}{AppBuild}";
+    public static string AppHeader => $"{AppTitle} v{AppVersion.ToString(3)}{AppBuild}";
+
+    public static Version AppVersion { get; } = string.IsNullOrEmpty(VersionOverride) ? Version.Parse(GitVersionInformation.SemVer) : Version.Parse(VersionOverride);
 
     public static string AppAuthor { get; } = Copyright?.Copyright ?? string.Empty;
 
@@ -45,7 +54,7 @@ public static class ApplicationInfo
     /// </summary>
     public static string AppInfoFormatted =>
         $"{AppHeader}{Environment.NewLine}" +
-        $"{GitVersionInformation.InformationalVersion}{Environment.NewLine}" +
+        $"{GitVersionInformation.FullBuildMetaData}{Environment.NewLine}" +
         $"Author: {AppAuthor}{Environment.NewLine}{Environment.NewLine}" +
         $"Description:{Environment.NewLine}" +
         $"  {AppDescription}";
