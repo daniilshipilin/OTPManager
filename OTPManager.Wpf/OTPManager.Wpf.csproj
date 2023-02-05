@@ -19,12 +19,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="ApplicationUpdater" Version="0.4.0" />
-        <PackageReference Include="GitVersion.MsBuild" Version="5.11.1">
+        <PackageReference Include="ApplicationUpdater" Version="0.4.1" />
+        <PackageReference Include="GitVersion.MsBuild" Version="5.12.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Otp.NET" Version="1.2.2" />
+        <PackageReference Include="Otp.NET" Version="1.3.0" />
         <PackageReference Include="QRCoder" Version="1.4.3" />
     </ItemGroup>
 
