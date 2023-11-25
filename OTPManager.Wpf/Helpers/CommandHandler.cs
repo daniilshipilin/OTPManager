@@ -3,19 +3,13 @@ namespace OTPManager.Wpf.Helpers;
 using System;
 using System.Windows.Input;
 
-public class CommandHandler : ICommand
+/// <summary>
+/// Initializes a new instance of the <see cref="CommandHandler"/> class.
+/// </summary>
+public class CommandHandler(Action action, Func<bool> canExecute) : ICommand
 {
-    private readonly Action action;
-    private readonly Func<bool> canExecute;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CommandHandler"/> class.
-    /// </summary>
-    public CommandHandler(Action action, Func<bool> canExecute)
-    {
-        this.action = action;
-        this.canExecute = canExecute;
-    }
+    private readonly Action action = action;
+    private readonly Func<bool> canExecute = canExecute;
 
     /// <summary>
     /// Wires CanExecuteChanged event.

@@ -10,9 +10,7 @@ public partial class LoginView : Window
     public bool LoginIsSuccessful { get; private set; }
 
     public LoginView()
-    {
-        this.InitializeComponent();
-    }
+        => this.InitializeComponent();
 
     private void Login()
     {

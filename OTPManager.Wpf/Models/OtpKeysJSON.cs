@@ -10,14 +10,14 @@ public class OtpKeysJSON
     public static int LastEditTimestamp { get; set; }
 
     [JsonPropertyName("filerevision")]
-    public int FileRevision
+    public static int FileRevision
     {
         get => Revision;
         set => Revision = value;
     }
 
     [JsonPropertyName("filelastedittimestamp")]
-    public int FileLastEditTimestamp
+    public static int FileLastEditTimestamp
     {
         get => LastEditTimestamp;
         set => LastEditTimestamp = value;

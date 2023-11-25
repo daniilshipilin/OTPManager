@@ -36,7 +36,7 @@ public partial class OtpView : Window, IDisposable
         this.ExportOtpKeysCommand = new CommandHandler(this.ExportOtpKeys, canExecute: () => true);
     }
 
-    public ObservableCollection<OtpObject> Otps { get; set; } = new ObservableCollection<OtpObject>();
+    public ObservableCollection<OtpObject> Otps { get; set; } = [];
 
     public OtpObject? SelectedOtp { get; set; }
 
