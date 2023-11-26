@@ -15,8 +15,7 @@ public static class OtpKeysProcessor
 
     public static void SetPassword(string password)
     {
-        using var sha256 = SHA256.Create();
-        byte[] hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(password))[0..32];
+        byte[] hashedPassword = SHA256.HashData(Encoding.UTF8.GetBytes(password))[0..32];
         encryption = new SymmetricEncryption(hashedPassword);
     }
 

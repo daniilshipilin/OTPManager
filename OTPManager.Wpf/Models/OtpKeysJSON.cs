@@ -10,14 +10,18 @@ public class OtpKeysJSON
     public static int LastEditTimestamp { get; set; }
 
     [JsonPropertyName("filerevision")]
-    public static int FileRevision
+#pragma warning disable CA1822 // Mark members as static
+    public int FileRevision
+#pragma warning restore CA1822 // Mark members as static
     {
         get => Revision;
         set => Revision = value;
     }
 
     [JsonPropertyName("filelastedittimestamp")]
-    public static int FileLastEditTimestamp
+#pragma warning disable CA1822 // Mark members as static
+    public int FileLastEditTimestamp
+#pragma warning restore CA1822 // Mark members as static
     {
         get => LastEditTimestamp;
         set => LastEditTimestamp = value;
