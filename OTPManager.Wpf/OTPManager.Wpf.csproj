@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="ApplicationUpdater" Version="0.4.1" />
+        <PackageReference Include="ApplicationUpdater" Version="0.5.0" />
         <PackageReference Include="GitVersion.MsBuild" Version="5.12.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
