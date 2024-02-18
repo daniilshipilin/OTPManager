@@ -73,8 +73,15 @@
             FontFamily="Consolas"
             ItemsSource="{Binding Otps}"
             SelectedCellsChanged="OtpsDataGrid_SelectedCellsChanged"
-            SelectedItem="{Binding SelectedOtp}">
+            SelectedItem="{Binding SelectedOtp}"
+            CellEditEnding="OtpsDataGrid_CellEditEnding">
             <DataGrid.Columns>
+                <DataGridCheckBoxColumn
+                    Width="auto"
+                    Binding="{Binding IsFavorite}"
+                    Header="Favorite"
+                    IsReadOnly="False"
+                    />
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding Description}"

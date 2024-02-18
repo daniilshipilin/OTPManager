@@ -65,6 +65,7 @@ public static class OtpKeysProcessor
                 otps.Add(new OtpObject(
                     entry.Description,
                     entry.Base32SecretKey,
+                    entry.IsFavorite,
                     entry.LastEditTimestamp));
             }
         }
@@ -84,6 +85,7 @@ public static class OtpKeysProcessor
                 {
                     Description = entry.Description,
                     Base32SecretKey = entry.Base32SecretKey,
+                    IsFavorite = entry.IsFavorite,
                     LastEditTimestamp = entry.LastEditTimestamp,
                 });
             }

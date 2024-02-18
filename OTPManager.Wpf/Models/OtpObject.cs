@@ -19,17 +19,19 @@ public class OtpObject
     private Totp? totp;
     private string? base32SecretKey;
 
-    public OtpObject(string description, string base32SecretKey)
+    public OtpObject(string description, string base32SecretKey, bool isFavorite)
     {
         this.Description = description;
         this.Base32SecretKey = base32SecretKey;
+        this.IsFavorite = isFavorite;
         this.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
     }
 
-    public OtpObject(string description, string base32SecretKey, int lastEditTimestamp)
+    public OtpObject(string description, string base32SecretKey, bool isFavorite, int lastEditTimestamp)
     {
         this.Description = description;
         this.Base32SecretKey = base32SecretKey;
+        this.IsFavorite = isFavorite;
         this.LastEditTimestamp = lastEditTimestamp;
     }
 
@@ -63,6 +65,8 @@ public class OtpObject
         }
     }
 
+    public bool IsFavorite { get; set; }
+
     public int LastEditTimestamp { get; set; }
 
     public string LastEditTimestampFormatted => TimestampHelper.UnixTimeStampToDateTime(this.LastEditTimestamp).ToString("s");
@@ -80,7 +84,7 @@ public class OtpObject
     public string TotpValue => this.totp?.ComputeTotp() ?? string.Empty;
 
     public static OtpObject GetRandomOtpObject()
-        => new OtpObject("_NewOtpKey", GetRandomBase32String());
+        => new OtpObject("_NewOtpKey", GetRandomBase32String(), false);
 
     public static string GetRandomBase32String(int length = 32)
     {

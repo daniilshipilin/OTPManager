@@ -127,7 +127,9 @@ public partial class OtpView : Window, IDisposable
         this.ClearTextBoxes();
         this.Otps.Clear();
 
-        foreach (var otpKey in OtpKeysProcessor.LoadData().OrderBy(x => x.Description))
+        foreach (var otpKey in OtpKeysProcessor.LoadData()
+                                        .OrderByDescending(x => x.IsFavorite)
+                                        .ThenBy(x => x.Description))
         {
             this.Otps.Add(otpKey);
         }
@@ -385,6 +387,27 @@ public partial class OtpView : Window, IDisposable
             this.selectedOtpDescriptionTextBox.Text = this.SelectedOtp.Description;
             this.selectedOtpBase32SecretKeyTextBox.Text = this.SelectedOtp.Base32SecretKey;
             this.OtpRefresh(this, null!);
+        }
+    }
+
+    private void OtpsDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+    {
+        if (e.EditingElement is CheckBox cb)
+        {
+            if (this.SelectedOtp is not null)
+            {
+                this.SelectedOtp.IsFavorite = cb.IsChecked is not null && cb.IsChecked.Value;
+
+                try
+                {
+                    OtpKeysProcessor.SaveData(this.Otps);
+                    this.InitData();
+                }
+                catch (Exception ex)
+                {
+                    ShowExceptionMessage(ex);
+                }
+            }
         }
     }
 

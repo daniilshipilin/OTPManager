@@ -35,6 +35,9 @@ public class OtpKeysJSON
         [JsonPropertyName("description")]
         public string Description { get; set; } = string.Empty;
 
+        [JsonPropertyName("isFavorite")]
+        public bool IsFavorite { get; set; }
+
         [JsonPropertyName("base32secretkey")]
         public string Base32SecretKey { get; set; } = string.Empty;
 
