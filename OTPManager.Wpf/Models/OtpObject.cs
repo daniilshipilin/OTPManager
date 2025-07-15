@@ -9,30 +9,24 @@ using OtpNet;
 
 public class OtpObject
 {
-    public static readonly IReadOnlyList<char> Base32Charset = new char[32]
-    {
+    private static readonly IReadOnlyList<char> Base32Charset =
+    [
         '2', '3', '4', '5', '6', '7',
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-    };
+    ];
+
+    private static readonly TimeCorrection TimeCorr = new TimeCorrection(NtpTimeProvider.GetAccurateUtcNow().DateTime);
 
     private Totp? totp;
     private string? base32SecretKey;
 
-    public OtpObject(string description, string base32SecretKey, bool isFavorite)
+    public OtpObject(string description, string base32SecretKey, bool isFavorite, int? lastEditTimestamp)
     {
         this.Description = description;
         this.Base32SecretKey = base32SecretKey;
         this.IsFavorite = isFavorite;
-        this.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
-    }
-
-    public OtpObject(string description, string base32SecretKey, bool isFavorite, int lastEditTimestamp)
-    {
-        this.Description = description;
-        this.Base32SecretKey = base32SecretKey;
-        this.IsFavorite = isFavorite;
-        this.LastEditTimestamp = lastEditTimestamp;
+        this.LastEditTimestamp = lastEditTimestamp ?? TimestampHelper.GetUnixTimestamp();
     }
 
     public string Description { get; set; }
@@ -55,13 +49,19 @@ public class OtpObject
                 throw new ArgumentException(nameof(this.Base32SecretKey));
             }
 
+            if (tmp.Equals(this.base32SecretKey))
+            {
+                return;
+            }
+
             this.base32SecretKey = tmp;
+
             this.totp = new Totp(
-                Base32Encoding.ToBytes(this.base32SecretKey),
+                Base32Encoding.ToBytes(this.Base32SecretKey),
                 this.TimeWindowStep,
-                this.HashMode,
+                OtpHashMode.Sha1,
                 this.TotpSize,
-                this.TimeCorr);
+                TimeCorr);
         }
     }
 
@@ -73,18 +73,14 @@ public class OtpObject
 
     public int TimeWindowStep { get; } = 30;
 
-    public OtpHashMode HashMode { get; } = OtpHashMode.Sha1;
-
     public int TotpSize { get; } = 6;
-
-    public TimeCorrection? TimeCorr { get; }
 
     public int RemainingSeconds => this.totp?.RemainingSeconds() ?? 0;
 
     public string TotpValue => this.totp?.ComputeTotp() ?? string.Empty;
 
     public static OtpObject GetRandomOtpObject()
-        => new OtpObject("_NewOtpKey", GetRandomBase32String(), false);
+        => new OtpObject("_NewOtpKey", GetRandomBase32String(), false, null);
 
     public static string GetRandomBase32String(int length = 32)
     {
