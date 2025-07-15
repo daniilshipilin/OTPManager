@@ -4,27 +4,19 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 
 public static class ApplicationInfo
 {
     private static readonly Assembly Ass = Assembly.GetExecutingAssembly();
-    private static readonly AssemblyTitleAttribute? Title = Ass.GetCustomAttributes<AssemblyTitleAttribute>().FirstOrDefault();
-    private static readonly AssemblyProductAttribute? Product = Ass.GetCustomAttributes<AssemblyProductAttribute>().FirstOrDefault();
-    private static readonly AssemblyDescriptionAttribute? Description = Ass.GetCustomAttributes<AssemblyDescriptionAttribute>().FirstOrDefault();
-    private static readonly AssemblyCopyrightAttribute? Copyright = Ass.GetCustomAttributes<AssemblyCopyrightAttribute>().FirstOrDefault();
+    private static readonly AssemblyTitleAttribute? Title = Ass.GetCustomAttribute<AssemblyTitleAttribute>();
+    private static readonly AssemblyProductAttribute? Product = Ass.GetCustomAttribute<AssemblyProductAttribute>();
+    private static readonly AssemblyDescriptionAttribute? Description = Ass.GetCustomAttribute<AssemblyDescriptionAttribute>();
+    private static readonly AssemblyCopyrightAttribute? Copyright = Ass.GetCustomAttribute<AssemblyCopyrightAttribute>();
 
     public const string AppBuild =
 #if DEBUG
         " [Debug]";
-#else
-        "";
-#endif
-
-    private const string VersionOverride =
-#if DEBUG
-        "";
 #else
         "";
 #endif
@@ -41,7 +33,7 @@ public static class ApplicationInfo
 
     public static string AppHeader => $"{AppTitle} v{AppVersion.ToString(3)}{AppBuild}";
 
-    public static Version AppVersion { get; } = string.IsNullOrEmpty(VersionOverride) ? Version.Parse(GitVersionInformation.SemVer) : Version.Parse(VersionOverride);
+    public static Version AppVersion { get; } = Ass.GetName().Version!;
 
     public static string AppAuthor { get; } = Copyright?.Copyright ?? string.Empty;
 
@@ -54,7 +46,7 @@ public static class ApplicationInfo
     /// </summary>
     public static string AppInfoFormatted =>
         $"{AppHeader}{Environment.NewLine}" +
-        $"{GitVersionInformation.FullBuildMetaData}{Environment.NewLine}" +
+        $"{AppVersion}{Environment.NewLine}" +
         $"Author: {AppAuthor}{Environment.NewLine}{Environment.NewLine}" +
         $"Description:{Environment.NewLine}" +
         $"  {AppDescription}";
@@ -62,5 +54,5 @@ public static class ApplicationInfo
     /// <summary>
     /// Sets application command line arguments.
     /// </summary>
-    public static void SetArgs(string[] args) => Args = args.ToList();
+    public static void SetArgs(string[] args) => Args = [.. args];
 }
