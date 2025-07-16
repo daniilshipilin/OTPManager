@@ -1,8 +1,6 @@
 namespace OTPManager.Wpf.Helpers;
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 using Microsoft.Win32;
 
@@ -17,14 +15,13 @@ public static class AppSettings
         RegistryBaseKey + "\\OTPManager";
 #endif
 
-    public const int CurrentConfigVersion = 2;
+    public const int CurrentConfigVersion = 3;
 
     private static readonly RegistryKey RegKeyOTPManager = Registry.CurrentUser.CreateSubKey(RegistryOTPManagerKey);
 
     private static readonly IReadOnlyDictionary<string, object> DefaultSettingsDict = new Dictionary<string, object>()
     {
         { nameof(ConfigVersion), CurrentConfigVersion },
-        { nameof(UpdatesLastCheckedTimestamp), default(DateTime).ToString("s") },
         { nameof(OtpKeys), string.Empty },
     };
 
@@ -35,21 +32,12 @@ public static class AppSettings
         set => RegKeyOTPManager.SetValue(nameof(ConfigVersion), value ?? 0);
     }
 
-    public static DateTime UpdatesLastCheckedTimestamp
-    {
-        get => DateTime.ParseExact((string?)RegKeyOTPManager.GetValue(nameof(UpdatesLastCheckedTimestamp)) ?? string.Empty, "s", CultureInfo.InvariantCulture);
-
-        private set => RegKeyOTPManager.SetValue(nameof(UpdatesLastCheckedTimestamp), value.ToString("s", CultureInfo.InvariantCulture));
-    }
-
     public static string OtpKeys
     {
         get => (string?)RegKeyOTPManager.GetValue(nameof(OtpKeys)) ?? string.Empty;
 
         set => RegKeyOTPManager.SetValue(nameof(OtpKeys), value ?? string.Empty);
     }
-
-    public static void UpdateUpdatesLastCheckedTimestamp() => UpdatesLastCheckedTimestamp = DateTime.Now;
 
     public static void CheckSettings()
     {
