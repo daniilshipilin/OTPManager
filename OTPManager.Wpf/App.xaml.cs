@@ -9,8 +9,6 @@ public partial class App : Application
 {
     private void ApplicationStartup(object sender, StartupEventArgs e)
     {
-        AppSettings.CheckSettings();
-
         if (e.Args.Length > 0)
         {
             try
