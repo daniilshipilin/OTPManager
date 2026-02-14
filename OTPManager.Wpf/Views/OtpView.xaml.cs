@@ -17,11 +17,9 @@ using QRCoder;
 public partial class OtpView : Window, IDisposable
 {
     private readonly DispatcherTimer otpUpdateTimer = new();
-    private readonly DispatcherTimer checkLastInputTimer = new();
+    private readonly DispatcherTimer logOffTimer = new();
     private readonly DispatcherTimer infoMessageResetTimer = new();
     private bool infoMessageIsNew;
-    private DateTime lastInput = DateTime.UtcNow;
-    private bool disposedValue;
 
     public OtpView()
     {
@@ -67,9 +65,9 @@ public partial class OtpView : Window, IDisposable
         this.infoMessageResetTimer.Tick += this.ResetInfoMessage;
         this.infoMessageResetTimer.Start();
 
-        this.checkLastInputTimer.Interval = TimeSpan.FromSeconds(1);
-        this.checkLastInputTimer.Tick += this.CheckLastInput;
-        this.checkLastInputTimer.Start();
+        this.logOffTimer.Interval = TimeSpan.FromMinutes(1);
+        this.logOffTimer.Tick += this.LogOffSession;
+        this.logOffTimer.Start();
     }
 
     private void StopTimers()
@@ -80,8 +78,8 @@ public partial class OtpView : Window, IDisposable
         this.infoMessageResetTimer.Stop();
         this.infoMessageResetTimer.Tick -= this.ResetInfoMessage;
 
-        this.checkLastInputTimer.Stop();
-        this.checkLastInputTimer.Tick -= this.CheckLastInput;
+        this.logOffTimer.Stop();
+        this.logOffTimer.Tick -= this.LogOffSession;
     }
 
     private void ResetInfoMessage(object? sender, EventArgs e)
@@ -96,13 +94,8 @@ public partial class OtpView : Window, IDisposable
         }
     }
 
-    private void CheckLastInput(object? sender, EventArgs e)
-    {
-        if (DateTime.UtcNow.Subtract(this.lastInput) > TimeSpan.FromMinutes(1))
-        {
-            this.Close();
-        }
-    }
+    private void LogOffSession(object? sender, EventArgs e)
+        => this.Close();
 
     private void OtpRefresh(object? sender, EventArgs e)
     {
@@ -150,7 +143,7 @@ public partial class OtpView : Window, IDisposable
 
     private void ExportOtpKeys()
     {
-        this.checkLastInputTimer.Stop();
+        this.logOffTimer.Stop();
 
         string otpKeysReg = AppSettings.ExportOtpKeysRegValue();
         var saveFileDialog = new SaveFileDialog()
@@ -168,8 +161,7 @@ public partial class OtpView : Window, IDisposable
             MessageBox.Show($"Otp keys successfully exported to '{saveFileDialog.FileName}'", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        this.lastInput = DateTime.UtcNow;
-        this.checkLastInputTimer.Start();
+        this.logOffTimer.Start();
     }
 
     private void ClearTextBoxes()
@@ -186,6 +178,7 @@ public partial class OtpView : Window, IDisposable
 
     private void InsertRecord()
     {
+        this.logOffTimer.Stop();
         var dr = MessageBox.Show("Insert new record?", "Prompt", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
         if (dr == MessageBoxResult.Yes)
@@ -202,10 +195,13 @@ public partial class OtpView : Window, IDisposable
                 ShowExceptionMessage(ex);
             }
         }
+
+        this.logOffTimer.Start();
     }
 
     private void SaveRecord()
     {
+        this.logOffTimer.Stop();
         var dr = MessageBox.Show("Save existing records?", "Prompt", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
         if (dr == MessageBoxResult.Yes)
@@ -227,10 +223,13 @@ public partial class OtpView : Window, IDisposable
                 }
             }
         }
+
+        this.logOffTimer.Start();
     }
 
     private void DeleteRecord()
     {
+        this.logOffTimer.Stop();
         var dr = MessageBox.Show("Delete currently selected record?", "Prompt", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
         if (dr == MessageBoxResult.Yes)
@@ -250,15 +249,24 @@ public partial class OtpView : Window, IDisposable
                 }
             }
         }
+
+        this.logOffTimer.Start();
     }
 
     private void ShowQRCode()
     {
+        this.logOffTimer.Stop();
+
         if (this.SelectedOtp is not null)
         {
             try
             {
-                var payload = GenerateQRPayload("label", this.SelectedOtp.Base32SecretKey, "issuer");
+                var payload = new PayloadGenerator.OneTimePassword
+                {
+                    Label = this.SelectedOtp.Description,
+                    Secret = this.SelectedOtp.Base32SecretKey,
+                    Issuer = "issuer",
+                };
                 var bitmapImage = GenerateQRCode(payload);
 
                 var window = new Window
@@ -272,23 +280,15 @@ public partial class OtpView : Window, IDisposable
                 var grid = new Grid();
                 grid.Children.Add(new Image { Source = bitmapImage });
                 window.Content = grid;
-                window.Show();
+                window.ShowDialog();
             }
             catch (Exception ex)
             {
                 ShowExceptionMessage(ex);
             }
         }
-    }
 
-    private static PayloadGenerator.OneTimePassword GenerateQRPayload(string label, string secret, string issuer)
-    {
-        return new PayloadGenerator.OneTimePassword()
-        {
-            Label = label,
-            Secret = secret,
-            Issuer = issuer,
-        };
+        this.logOffTimer.Start();
     }
 
     private static BitmapImage GenerateQRCode(PayloadGenerator.OneTimePassword payload)
@@ -313,6 +313,7 @@ public partial class OtpView : Window, IDisposable
 
     private void GenerateRandomBase32Key()
     {
+        this.logOffTimer.Stop();
         var dr = MessageBox.Show("Generate random base32 secret key?", "Prompt", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
         if (dr == MessageBoxResult.Yes)
@@ -333,6 +334,8 @@ public partial class OtpView : Window, IDisposable
                 }
             }
         }
+
+        this.logOffTimer.Start();
     }
 
     private static void ShowExceptionMessage(Exception ex)
@@ -353,19 +356,27 @@ public partial class OtpView : Window, IDisposable
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
+        this.logOffTimer.Stop();
+
         if (e.Key == Key.Escape)
         {
             this.Close();
+            return;
         }
 
-        this.lastInput = DateTime.UtcNow;
+        this.logOffTimer.Start();
     }
 
     private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        => this.lastInput = DateTime.UtcNow;
+    {
+        this.logOffTimer.Stop();
+        this.logOffTimer.Start();
+    }
 
     private void OtpValueTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        this.logOffTimer.Stop();
+
         if (this.SelectedOtp is not null)
         {
             try
@@ -378,20 +389,36 @@ public partial class OtpView : Window, IDisposable
                 ShowExceptionMessage(ex);
             }
         }
+
+        this.logOffTimer.Start();
     }
 
     private void OtpsDataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
     {
+        this.logOffTimer.Stop();
+
         if (this.SelectedOtp is not null)
         {
             this.selectedOtpDescriptionTextBox.Text = this.SelectedOtp.Description;
             this.selectedOtpBase32SecretKeyTextBox.Text = this.SelectedOtp.Base32SecretKey;
             this.OtpRefresh(this, null!);
+
+            try
+            {
+                Clipboard.SetDataObject(this.SelectedOtp.TotpValue);
+            }
+            catch (Exception)
+            {
+            }
         }
+
+        this.logOffTimer.Start();
     }
 
     private void OtpsDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
     {
+        this.logOffTimer.Stop();
+
         if (e.EditingElement is CheckBox cb)
         {
             if (this.SelectedOtp is not null)
@@ -409,28 +436,14 @@ public partial class OtpView : Window, IDisposable
                 }
             }
         }
-    }
 
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!this.disposedValue)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-                this.StopTimers();
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            this.disposedValue = true;
-        }
+        this.logOffTimer.Start();
     }
 
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        this.Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        this.StopTimers();
+        this.Otps.Clear();
+        this.SelectedOtp = null;
     }
 }
