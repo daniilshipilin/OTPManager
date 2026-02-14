@@ -1,33 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8-windows</TargetFramework>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>Images\2fa.ico</ApplicationIcon>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <AssemblyName>OTPManager</AssemblyName>
-        <Version>0.17.0</Version>
+        <Version>1.0.0</Version>
     </PropertyGroup>
-
-    <ItemGroup>
-      <None Remove="Images\2fa.ico" />
-      <None Remove="Images\2fa.png" />
-      <None Remove="Images\key.ico" />
-      <None Remove="Images\key.png" />
-    </ItemGroup>
-
     <ItemGroup>
         <PackageReference Include="GuerrillaNtp" Version="3.1.0" />
-        <PackageReference Include="Otp.NET" Version="1.4.0" />
-        <PackageReference Include="QRCoder" Version="1.6.0" />
+        <PackageReference Include="Otp.NET" Version="1.4.1" />
+        <PackageReference Include="QRCoder" Version="1.7.0" />
     </ItemGroup>
-
     <ItemGroup>
-      <Resource Include="Images\2fa.ico" />
-      <Resource Include="Images\2fa.png" />
-      <Resource Include="Images\key.ico" />
-      <Resource Include="Images\key.png" />
+        <Resource Include="Images\2fa.ico" />
+        <Resource Include="Images\2fa.png" />
+        <Resource Include="Images\key.ico" />
+        <Resource Include="Images\key.png" />
     </ItemGroup>
-
 </Project>
