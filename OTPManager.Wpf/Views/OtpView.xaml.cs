@@ -410,14 +410,6 @@ public partial class OtpView : Window, IDisposable
             this.selectedOtpDescriptionTextBox.Text = this.SelectedOtp.Description;
             this.selectedOtpBase32SecretKeyTextBox.Text = this.SelectedOtp.Base32SecretKey;
             this.OtpRefresh(this, null!);
-
-            try
-            {
-                Clipboard.SetDataObject(this.SelectedOtp.TotpValue);
-            }
-            catch (Exception)
-            {
-            }
         }
 
         this.logOffTimer.Start();
