@@ -20,6 +20,7 @@ public partial class OtpView : Window, IDisposable
     private readonly DispatcherTimer logOffTimer = new();
     private readonly DispatcherTimer infoMessageResetTimer = new();
     private bool infoMessageIsNew;
+    private string previousTotpValue = string.Empty;
 
     public OtpView()
     {
@@ -101,9 +102,15 @@ public partial class OtpView : Window, IDisposable
     {
         if (this.SelectedOtp is not null)
         {
-            int totpHalfSize = this.SelectedOtp.TotpSize / 2;
-            this.otpValueTextBlock.Text = $"{this.SelectedOtp.TotpValue[0..totpHalfSize]} {this.SelectedOtp.TotpValue[totpHalfSize..]}";
-            this.otpRemainingSecondsTextBlock.Text = $"{this.SelectedOtp.RemainingSeconds} sec.";
+            string currentValue = this.SelectedOtp.TotpValue;
+
+            if (!this.previousTotpValue.Equals(currentValue))
+            {
+                int totpHalfSize = this.SelectedOtp.TotpSize / 2;
+                this.otpValueTextBlock.Text = $"{currentValue[0..totpHalfSize]} {currentValue[totpHalfSize..]}";
+                this.previousTotpValue = currentValue;
+            }
+
             this.progressBar.Value = (this.SelectedOtp.TimeWindowStep - this.SelectedOtp.RemainingSeconds) / (double)this.SelectedOtp.TimeWindowStep * 100;
         }
     }
@@ -117,6 +124,8 @@ public partial class OtpView : Window, IDisposable
     private void InitData()
     {
         this.otpUpdateTimer.Stop();
+        this.SelectedOtp = null;
+        this.previousTotpValue = string.Empty;
         this.ClearTextBoxes();
         this.Otps.Clear();
 
@@ -169,7 +178,6 @@ public partial class OtpView : Window, IDisposable
         this.selectedOtpDescriptionTextBox.Text = string.Empty;
         this.selectedOtpBase32SecretKeyTextBox.Text = string.Empty;
         this.otpValueTextBlock.Text = string.Empty;
-        this.otpRemainingSecondsTextBlock.Text = string.Empty;
         this.progressBar.Value = 0;
         this.totalRecordsLabel.Content = string.Empty;
         this.dbRevisionLabel.Content = string.Empty;

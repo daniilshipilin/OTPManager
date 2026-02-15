@@ -33,17 +33,11 @@
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
 
-        <Label
-            Grid.Row="0"
-            Grid.Column="0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Content="Otp Value:" />
-
         <TextBlock
             x:Name="otpValueTextBlock"
             Grid.Row="0"
-            Grid.Column="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             d:Text="otpValueTextBlock"
@@ -51,24 +45,15 @@
             FontSize="24"
             FontWeight="Bold"
             Foreground="#00C"
+            Padding="5"
             MouseLeftButtonDown="OtpValueTextBlock_MouseLeftButtonDown" />
-
-        <TextBlock
-            x:Name="otpRemainingSecondsTextBlock"
-            Grid.Row="0"
-            Grid.Column="2"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            d:Text="otpRemainingSecondsTextBlock"
-            FontFamily="Consolas"
-            FontSize="24" />
 
         <DataGrid
             x:Name="otpsDataGrid"
             Grid.Row="1"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            Margin="10,10,10,0"
+            Margin="10,0,10,0"
             AutoGenerateColumns="False"
             FontFamily="Consolas"
             ItemsSource="{Binding Otps}"
