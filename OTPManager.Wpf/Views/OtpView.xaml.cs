@@ -279,8 +279,8 @@ public partial class OtpView : Window, IDisposable
                 var window = new Window
                 {
                     Title = this.SelectedOtp.Description,
-                    Width = 500,
-                    Height = 500,
+                    Width = 512,
+                    Height = 512,
                     WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 };
 
@@ -303,7 +303,7 @@ public partial class OtpView : Window, IDisposable
         using var qrGenerator = new QRCodeGenerator();
         using var qrCodeData = qrGenerator.CreateQrCode(payload.ToString(), QRCodeGenerator.ECCLevel.Q);
         using var qrCode = new QRCode(qrCodeData);
-        using var qrCodeImage = qrCode.GetGraphic(20);
+        using var qrCodeImage = qrCode.GetGraphic(16);
 
         using var memory = new MemoryStream();
         qrCodeImage.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
