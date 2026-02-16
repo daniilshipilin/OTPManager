@@ -271,9 +271,8 @@ public partial class OtpView : Window, IDisposable
             {
                 var payload = new PayloadGenerator.OneTimePassword
                 {
-                    Label = this.SelectedOtp.Description,
                     Secret = this.SelectedOtp.Base32SecretKey,
-                    Issuer = "issuer",
+
                 };
                 var bitmapImage = GenerateQRCode(payload);
 
