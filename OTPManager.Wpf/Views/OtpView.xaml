@@ -132,7 +132,7 @@
             Grid.Column="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Content="Base32SecretKey:" />
+            Content="Secret Key:" />
 
         <TextBox
             x:Name="selectedOtpDescriptionTextBox"
@@ -145,17 +145,14 @@
             FontFamily="Consolas"
             TextAlignment="Left" />
 
-        <TextBox
-            x:Name="selectedOtpBase32SecretKeyTextBox"
+        <PasswordBox
+            x:Name="selectedOtpBase32SecretKeyPasswordBox"
             Grid.Row="4"
             Grid.Column="1"
             Padding="3"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
-            d:Text="selectedOtpBase32SecretKeyTextBox"
-            FontFamily="Consolas"
-            TextAlignment="Left"
-            AcceptsReturn="True" />
+            MouseDoubleClick="SelectedOtpBase32SecretKeyPasswordBox_MouseDoubleClick" />
 
         <StackPanel
             Grid.Row="3"

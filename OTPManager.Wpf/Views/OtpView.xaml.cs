@@ -144,7 +144,7 @@ public partial class OtpView : Window, IDisposable
         {
             this.SelectedOtp = this.Otps.First();
             this.selectedOtpDescriptionTextBox.Text = this.SelectedOtp.Description;
-            this.selectedOtpBase32SecretKeyTextBox.Text = this.SelectedOtp.Base32SecretKey;
+            this.selectedOtpBase32SecretKeyPasswordBox.Password = this.SelectedOtp.Base32SecretKey;
             this.totalRecordsLabel.Content = this.Otps.Count;
             this.otpUpdateTimer.Start();
         }
@@ -176,7 +176,7 @@ public partial class OtpView : Window, IDisposable
     private void ClearTextBoxes()
     {
         this.selectedOtpDescriptionTextBox.Text = string.Empty;
-        this.selectedOtpBase32SecretKeyTextBox.Text = string.Empty;
+        this.selectedOtpBase32SecretKeyPasswordBox.Password = string.Empty;
         this.otpValueTextBlock.Text = string.Empty;
         this.progressBar.Value = 0;
         this.totalRecordsLabel.Content = string.Empty;
@@ -219,7 +219,7 @@ public partial class OtpView : Window, IDisposable
                 try
                 {
                     this.SelectedOtp.Description = this.selectedOtpDescriptionTextBox.Text;
-                    this.SelectedOtp.Base32SecretKey = this.selectedOtpBase32SecretKeyTextBox.Text;
+                    this.SelectedOtp.Base32SecretKey = this.selectedOtpBase32SecretKeyPasswordBox.Password;
                     this.SelectedOtp.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
                     OtpKeysProcessor.SaveData(this.Otps);
                     this.PrintInfoMessage("Record updated");
@@ -279,8 +279,11 @@ public partial class OtpView : Window, IDisposable
                 var window = new Window
                 {
                     Title = this.SelectedOtp.Description,
+                    MinWidth = 128,
+                    MinHeight = 128,
                     Width = 512,
                     Height = 512,
+                    Margin = new Thickness(20),
                     WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 };
 
@@ -407,7 +410,7 @@ public partial class OtpView : Window, IDisposable
         if (this.SelectedOtp is not null)
         {
             this.selectedOtpDescriptionTextBox.Text = this.SelectedOtp.Description;
-            this.selectedOtpBase32SecretKeyTextBox.Text = this.SelectedOtp.Base32SecretKey;
+            this.selectedOtpBase32SecretKeyPasswordBox.Password = this.SelectedOtp.Base32SecretKey;
             this.OtpRefresh(this, null!);
         }
 
@@ -444,5 +447,44 @@ public partial class OtpView : Window, IDisposable
         this.StopTimers();
         this.Otps.Clear();
         this.SelectedOtp = null;
+    }
+
+    private void SelectedOtpBase32SecretKeyPasswordBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        this.logOffTimer.Stop();
+
+        if (this.SelectedOtp is not null)
+        {
+            try
+            {
+                var window = new Window
+                {
+                    Title = this.SelectedOtp.Description,
+                    MinWidth = 128,
+                    MinHeight = 128,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                };
+
+                var grid = new Grid();
+                grid.Children.Add(new TextBox
+                {
+                    Text = this.SelectedOtp.Base32SecretKey,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(20),
+                    BorderThickness = new Thickness(0),
+                    IsReadOnly = true
+                });
+                window.Content = grid;
+                window.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                ShowExceptionMessage(ex);
+            }
+        }
+
+        this.logOffTimer.Start();
     }
 }
