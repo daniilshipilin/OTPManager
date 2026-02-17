@@ -136,8 +136,8 @@ public partial class OtpView : Window, IDisposable
             this.Otps.Add(otpKey);
         }
 
-        this.dbRevisionLabel.Content = OtpKeysJSON.Revision;
-        this.dbRevisionTimestampLabel.Content = TimestampHelper.UnixTimeStampToDateTime(OtpKeysJSON.LastEditTimestamp).ToString("s");
+        this.dbRevisionLabel.Content = OtpKeysJson.Revision;
+        this.dbRevisionTimestampLabel.Content = TimestampHelper.UnixTimeStampToDateTime(OtpKeysJson.LastEditTimestamp).ToString("s");
 
         // select first item
         if (this.Otps.Count > 0)

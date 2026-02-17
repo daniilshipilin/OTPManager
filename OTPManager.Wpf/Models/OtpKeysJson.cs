@@ -3,7 +3,7 @@ namespace OTPManager.Wpf.Models;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-public class OtpKeysJSON
+public class OtpKeysJson
 {
     public static int Revision { get; set; }
 

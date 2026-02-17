@@ -55,7 +55,7 @@ public static class OtpKeysProcessor
 
         byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
         string json = Encoding.UTF8.GetString(encryption.Decrypt(encryptedBytes));
-        var jsonObj = JsonSerializer.Deserialize<OtpKeysJSON>(json);
+        var jsonObj = JsonSerializer.Deserialize<OtpKeysJson>(json);
         var otps = new List<OtpObject>();
 
         if (jsonObj is not null)
@@ -75,13 +75,13 @@ public static class OtpKeysProcessor
 
     public static void SaveData(IEnumerable<OtpObject> otps)
     {
-        var jsonObj = new OtpKeysJSON();
+        var jsonObj = new OtpKeysJson();
 
         if (otps is not null)
         {
             foreach (var entry in otps)
             {
-                jsonObj.OtpEntries.Add(new OtpKeysJSON.OtpEntry()
+                jsonObj.OtpEntries.Add(new OtpKeysJson.OtpEntry()
                 {
                     Description = entry.Description,
                     Base32SecretKey = entry.Base32SecretKey,
@@ -91,8 +91,8 @@ public static class OtpKeysProcessor
             }
         }
 
-        OtpKeysJSON.Revision++;
-        OtpKeysJSON.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
+        OtpKeysJson.Revision++;
+        OtpKeysJson.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
 
         byte[] textBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonObj));
         byte[] encryptedBytes = encryption.Encrypt(textBytes);
