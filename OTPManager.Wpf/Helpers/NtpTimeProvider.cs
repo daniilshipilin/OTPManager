@@ -1,31 +1,43 @@
 namespace OTPManager.Wpf.Helpers;
 
 using System;
+using System.Threading.Tasks;
 using GuerrillaNtp;
 
 public static class NtpTimeProvider
 {
-    private static NtpClock? cachedNtpClock;
+    private static readonly NtpClient ntpClient = NtpClient.Default;
     private static DateTimeOffset? lastSuccessfulSyncTime;
 
-    public static DateTimeOffset GetAccurateUtcNow()
+    public static async Task InitializeAsync()
     {
-        if (cachedNtpClock is not null && lastSuccessfulSyncTime.HasValue &&
+        try
+        {
+            var ntpClock = await ntpClient.QueryAsync();
+            lastSuccessfulSyncTime = ntpClock.UtcNow;
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    public static DateTime GetAccurateUtcNow()
+    {
+        if (ntpClient.Last is not null && lastSuccessfulSyncTime.HasValue &&
             (DateTimeOffset.UtcNow - lastSuccessfulSyncTime.Value) < TimeSpan.FromHours(1))
         {
-            return cachedNtpClock.UtcNow;
+            return ntpClient.Last.UtcNow.DateTime;
         }
 
         try
         {
-            var client = NtpClient.Default;
-            cachedNtpClock = client.Query();
-            lastSuccessfulSyncTime = DateTimeOffset.UtcNow;
-            return cachedNtpClock.UtcNow;
+            var ntpClock = ntpClient.Query();
+            lastSuccessfulSyncTime = ntpClock.UtcNow;
+            return ntpClock.UtcNow.DateTime;
         }
         catch (Exception)
         {
-            return DateTimeOffset.UtcNow;
+            return DateTime.UtcNow;
         }
     }
 }

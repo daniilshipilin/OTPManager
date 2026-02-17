@@ -16,8 +16,6 @@ public class OtpObject
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     ];
 
-    private static readonly TimeCorrection TimeCorr = new TimeCorrection(NtpTimeProvider.GetAccurateUtcNow().DateTime);
-
     private Totp? totp;
     private string? base32SecretKey;
 
@@ -64,7 +62,7 @@ public class OtpObject
                 this.TimeWindowStep,
                 this.OtpHashMode,
                 this.TotpSize,
-                TimeCorr);
+                new TimeCorrection(NtpTimeProvider.GetAccurateUtcNow()));
         }
     }
 

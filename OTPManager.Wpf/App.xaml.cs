@@ -1,6 +1,7 @@
 namespace OTPManager.Wpf;
 
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using OTPManager.Wpf.Helpers;
 using OTPManager.Wpf.Views;
@@ -36,6 +37,8 @@ public partial class App : Application
 
             Environment.Exit(0);
         }
+
+        Task.Run(async () => await NtpTimeProvider.InitializeAsync());
 
         while (true)
         {
