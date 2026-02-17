@@ -15,5 +15,7 @@ public static class ApplicationInfo
         "";
 #endif
 
+    public static string? AppTitle => Title?.Title;
+
     public static string AppHeader => $"{Title?.Title} v{FileVersion?.Version}{AppBuild}";
 }

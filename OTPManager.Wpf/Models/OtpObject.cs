@@ -59,7 +59,7 @@ public class OtpObject
             this.totp = new Totp(
                 Base32Encoding.ToBytes(this.Base32SecretKey),
                 this.TimeWindowStep,
-                OtpHashMode.Sha1,
+                this.OtpHashMode,
                 this.TotpSize,
                 TimeCorr);
         }
@@ -72,6 +72,8 @@ public class OtpObject
     public string LastEditTimestampFormatted => TimestampHelper.UnixTimeStampToDateTime(this.LastEditTimestamp).ToString("s");
 
     public int TimeWindowStep { get; } = 30;
+
+    public OtpHashMode OtpHashMode { get; } = OtpHashMode.Sha1;
 
     public int TotpSize { get; } = 6;
 

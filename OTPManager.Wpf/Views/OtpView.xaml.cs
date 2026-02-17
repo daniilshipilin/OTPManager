@@ -272,8 +272,17 @@ public partial class OtpView : Window, IDisposable
                 var payload = new PayloadGenerator.OneTimePassword
                 {
                     Secret = this.SelectedOtp.Base32SecretKey,
-
+                    Issuer = ApplicationInfo.AppTitle,
+                    AuthAlgorithm = this.SelectedOtp.OtpHashMode == OtpNet.OtpHashMode.Sha1
+                        ? PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA1
+                        : this.SelectedOtp.OtpHashMode == OtpNet.OtpHashMode.Sha256
+                            ? PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA256
+                            : PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA512,
+                    Digits = this.SelectedOtp.TotpSize,
+                    Period = this.SelectedOtp.TimeWindowStep,
+                    Type = PayloadGenerator.OneTimePassword.OneTimePasswordAuthType.TOTP,
                 };
+
                 var bitmapImage = GenerateQRCode(payload);
 
                 var window = new Window
@@ -304,7 +313,7 @@ public partial class OtpView : Window, IDisposable
     private static BitmapImage GenerateQRCode(PayloadGenerator.OneTimePassword payload)
     {
         using var qrGenerator = new QRCodeGenerator();
-        using var qrCodeData = qrGenerator.CreateQrCode(payload.ToString(), QRCodeGenerator.ECCLevel.Q);
+        using var qrCodeData = qrGenerator.CreateQrCode(payload);
         using var qrCode = new QRCode(qrCodeData);
         using var qrCodeImage = qrCode.GetGraphic(16);
 
