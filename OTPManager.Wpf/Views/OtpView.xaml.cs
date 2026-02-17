@@ -273,11 +273,12 @@ public partial class OtpView : Window, IDisposable
                 {
                     Secret = this.SelectedOtp.Base32SecretKey,
                     Issuer = ApplicationInfo.AppTitle,
-                    AuthAlgorithm = this.SelectedOtp.OtpHashMode == OtpNet.OtpHashMode.Sha1
-                        ? PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA1
-                        : this.SelectedOtp.OtpHashMode == OtpNet.OtpHashMode.Sha256
-                            ? PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA256
-                            : PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA512,
+                    AuthAlgorithm = this.SelectedOtp.OtpHashMode switch
+                    {
+                        OtpNet.OtpHashMode.Sha1 => PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA1,
+                        OtpNet.OtpHashMode.Sha256 => PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA256,
+                        _ => PayloadGenerator.OneTimePassword.OneTimePasswordAuthAlgorithm.SHA512,
+                    },
                     Digits = this.SelectedOtp.TotpSize,
                     Period = this.SelectedOtp.TimeWindowStep,
                     Type = PayloadGenerator.OneTimePassword.OneTimePasswordAuthType.TOTP,
