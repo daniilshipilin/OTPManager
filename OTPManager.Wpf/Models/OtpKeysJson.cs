@@ -1,5 +1,6 @@
 namespace OTPManager.Wpf.Models;
 
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -28,10 +29,13 @@ public class OtpKeysJson
     }
 
     [JsonPropertyName("otpentries")]
-    public IList<OtpEntry> OtpEntries { get; set; } = new List<OtpEntry>();
+    public IList<OtpEntry> OtpEntries { get; set; } = [];
 
     public class OtpEntry
     {
+        [JsonPropertyName("id")]
+        public Guid Id { get; set; }
+
         [JsonPropertyName("description")]
         public string Description { get; set; } = string.Empty;
 

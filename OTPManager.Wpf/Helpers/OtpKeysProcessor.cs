@@ -63,6 +63,7 @@ public static class OtpKeysProcessor
             foreach (var entry in jsonObj.OtpEntries)
             {
                 otps.Add(new OtpObject(
+                    entry.Id,
                     entry.Description,
                     entry.Base32SecretKey,
                     entry.IsFavorite,
@@ -81,8 +82,9 @@ public static class OtpKeysProcessor
         {
             foreach (var entry in otps)
             {
-                jsonObj.OtpEntries.Add(new OtpKeysJson.OtpEntry()
+                jsonObj.OtpEntries.Add(new OtpKeysJson.OtpEntry
                 {
+                    Id = entry.Id == Guid.Empty ? Guid.CreateVersion7() : entry.Id,
                     Description = entry.Description,
                     Base32SecretKey = entry.Base32SecretKey,
                     IsFavorite = entry.IsFavorite,
@@ -104,7 +106,7 @@ public static class OtpKeysProcessor
         if (string.IsNullOrEmpty(AppSettings.OtpKeys))
         {
             // save file with no record entries
-            SaveData(new List<OtpObject>());
+            SaveData([]);
         }
     }
 }

@@ -193,7 +193,8 @@ public partial class OtpView : Window, IDisposable
         {
             try
             {
-                this.Otps.Add(OtpObject.GetRandomOtpObject());
+                var obj = OtpObject.GetRandomOtpObject();
+                this.Otps.Add(obj);
                 OtpKeysProcessor.SaveData(this.Otps);
                 this.PrintInfoMessage("Record added");
                 this.InitData();
