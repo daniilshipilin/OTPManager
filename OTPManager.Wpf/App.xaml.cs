@@ -41,7 +41,7 @@ public partial class App : Application
 
         while (true)
         {
-            var loginView = new LoginView();
+            using var loginView = new LoginView();
             loginView.ShowDialog();
 
             if (loginView.LoginIsSuccessful)

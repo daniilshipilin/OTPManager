@@ -5,12 +5,17 @@ using System.Windows;
 using System.Windows.Input;
 using OTPManager.Wpf.Helpers;
 
-public partial class LoginView : Window
+public partial class LoginView : Window, IDisposable
 {
     public bool LoginIsSuccessful { get; private set; }
 
     public LoginView()
         => this.InitializeComponent();
+
+    public void Dispose()
+    {
+        this.passwordBox.Clear();
+    }
 
     private void Login()
     {
