@@ -1,14 +1,13 @@
 namespace OTPManager.Wpf;
 
 using System;
-using System.Threading.Tasks;
 using System.Windows;
 using OTPManager.Wpf.Helpers;
 using OTPManager.Wpf.Views;
 
 public partial class App : Application
 {
-    private void ApplicationStartup(object sender, StartupEventArgs e)
+    private async void ApplicationStartup(object sender, StartupEventArgs e)
     {
         if (e.Args.Length > 0)
         {
@@ -38,7 +37,7 @@ public partial class App : Application
             Environment.Exit(0);
         }
 
-        Task.Run(async () => await NtpTimeProvider.InitializeAsync());
+        using var syncTask = NtpTimeProvider.InitializeAsync();
 
         while (true)
         {
@@ -47,6 +46,7 @@ public partial class App : Application
 
             if (loginView.LoginIsSuccessful)
             {
+                await syncTask;
                 using var otpView = new OtpView();
                 otpView.ShowDialog();
             }
