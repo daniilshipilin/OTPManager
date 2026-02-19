@@ -22,10 +22,12 @@ public partial class OtpView : Window, IDisposable
     private bool infoMessageIsNew;
     private string previousTotpValue = string.Empty;
 
-    public OtpView()
+    public OtpView(bool timeIsSynced)
     {
         this.InitializeComponent();
         this.DataContext = this;
+
+        this.timeSyncedStatusDot.Visibility = timeIsSynced ? Visibility.Visible : Visibility.Hidden;
 
         this.SaveRecordCommand = new CommandHandler(this.SaveRecord, canExecute: () => this.Otps.Count > 0);
         this.InsertRecordCommand = new CommandHandler(this.InsertRecord, canExecute: () => true);

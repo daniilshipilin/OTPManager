@@ -16,7 +16,7 @@ public class OtpObject
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     ];
 
-    public static TimeCorrection? TimeCorr { get; set; }
+    public static TimeCorrection? TimeCorr { get; private set; }
 
     private Totp? totp;
     private string? base32SecretKey;
@@ -83,6 +83,11 @@ public class OtpObject
     public int RemainingSeconds => this.totp?.RemainingSeconds() ?? 0;
 
     public string TotpValue => this.totp?.ComputeTotp() ?? string.Empty;
+
+    public static void SetTimeCorrection(DateTimeOffset date)
+    {
+        TimeCorr = new TimeCorrection(date.UtcDateTime);
+    }
 
     public static OtpObject GetRandomOtpObject()
     {

@@ -38,7 +38,8 @@ public partial class App : Application
             Environment.Exit(0);
         }
 
-        using var timeSyncTask = Helpers.NetworkTimeProvider.GetNetworkTimeAsync();
+        bool timeIsSynced = false;
+        using var timeSyncTask = NetworkTimeProvider.GetNetworkTimeAsync();
 
         while (true)
         {
@@ -49,12 +50,13 @@ public partial class App : Application
             {
                 await timeSyncTask;
 
-                if (timeSyncTask.IsCompletedSuccessfully)
+                if (!timeIsSynced && timeSyncTask.IsCompletedSuccessfully && timeSyncTask.Result.HasValue)
                 {
-                    OtpObject.TimeCorr = new OtpNet.TimeCorrection(timeSyncTask.Result.UtcDateTime);
+                    OtpObject.SetTimeCorrection(timeSyncTask.Result.Value);
+                    timeIsSynced = true;
                 }
 
-                using var otpView = new OtpView();
+                using var otpView = new OtpView(timeIsSynced);
                 otpView.ShowDialog();
             }
             else

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 public static class NetworkTimeProvider
 {
-    public static async Task<DateTimeOffset> GetNetworkTimeAsync()
+    public static async Task<DateTimeOffset?> GetNetworkTimeAsync()
     {
         try
         {
@@ -22,6 +22,6 @@ public static class NetworkTimeProvider
         {
         }
 
-        return DateTimeOffset.UtcNow;
+        return null;
     }
 }
