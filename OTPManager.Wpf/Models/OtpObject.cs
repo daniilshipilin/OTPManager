@@ -16,7 +16,7 @@ public class OtpObject
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     ];
 
-    private static readonly TimeCorrection TimeCorr = new TimeCorrection(NtpTimeProvider.GetAccurateUtcNow());
+    public static TimeCorrection? TimeCorr { get; set; }
 
     private Totp? totp;
     private string? base32SecretKey;

@@ -3,6 +3,7 @@ namespace OTPManager.Wpf;
 using System;
 using System.Windows;
 using OTPManager.Wpf.Helpers;
+using OTPManager.Wpf.Models;
 using OTPManager.Wpf.Views;
 
 public partial class App : Application
@@ -37,7 +38,7 @@ public partial class App : Application
             Environment.Exit(0);
         }
 
-        using var syncTask = NtpTimeProvider.InitializeAsync();
+        using var timeSyncTask = Helpers.NetworkTimeProvider.GetNetworkTimeAsync();
 
         while (true)
         {
@@ -46,7 +47,13 @@ public partial class App : Application
 
             if (loginView.LoginIsSuccessful)
             {
-                await syncTask;
+                await timeSyncTask;
+
+                if (timeSyncTask.IsCompletedSuccessfully)
+                {
+                    OtpObject.TimeCorr = new OtpNet.TimeCorrection(timeSyncTask.Result.UtcDateTime);
+                }
+
                 using var otpView = new OtpView();
                 otpView.ShowDialog();
             }
