@@ -1,7 +1,9 @@
 namespace OTPManager.Wpf;
 
 using System;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Animation;
 using OTPManager.Wpf.Helpers;
 using OTPManager.Wpf.Models;
 using OTPManager.Wpf.Views;
@@ -39,7 +41,7 @@ public partial class App : Application
         }
 
         bool timeIsSynced = false;
-        using var timeSyncTask = NetworkTimeProvider.GetNetworkTimeAsync();
+        using var timeSyncTask = SyncTimeAsync();
 
         while (true)
         {
@@ -48,12 +50,14 @@ public partial class App : Application
 
             if (loginView.LoginIsSuccessful)
             {
-                await timeSyncTask;
-
-                if (!timeIsSynced && timeSyncTask.IsCompletedSuccessfully && timeSyncTask.Result.HasValue)
+                if (!timeIsSynced)
                 {
-                    OtpObject.SetTimeCorrection(timeSyncTask.Result.Value);
-                    timeIsSynced = true;
+                    await timeSyncTask;
+
+                    if (timeSyncTask.IsCompletedSuccessfully)
+                    {
+                        timeIsSynced = true;
+                    }
                 }
 
                 using var otpView = new OtpView(timeIsSynced);
@@ -66,5 +70,15 @@ public partial class App : Application
         }
 
         Environment.Exit(0);
+    }
+
+    private static async Task SyncTimeAsync()
+    {
+        var time = await NetworkTimeProvider.GetNetworkTimeAsync();
+
+        if (time.HasValue)
+        {
+            OtpObject.SetTimeCorrection(time.Value);
+        }
     }
 }

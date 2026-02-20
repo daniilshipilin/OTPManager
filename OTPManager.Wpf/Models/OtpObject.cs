@@ -84,10 +84,8 @@ public class OtpObject
 
     public string TotpValue => this.totp?.ComputeTotp() ?? string.Empty;
 
-    public static void SetTimeCorrection(DateTimeOffset date)
-    {
-        TimeCorr = new TimeCorrection(date.UtcDateTime);
-    }
+    public static void SetTimeCorrection(DateTimeOffset correctUtc)
+        => TimeCorr ??= new TimeCorrection(correctUtc.UtcDateTime);
 
     public static OtpObject GetRandomOtpObject()
     {
