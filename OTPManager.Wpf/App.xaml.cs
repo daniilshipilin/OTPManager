@@ -3,7 +3,6 @@ namespace OTPManager.Wpf;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Animation;
 using OTPManager.Wpf.Helpers;
 using OTPManager.Wpf.Models;
 using OTPManager.Wpf.Views;
@@ -40,27 +39,16 @@ public partial class App : Application
             Environment.Exit(0);
         }
 
-        bool timeIsSynced = false;
-        using var timeSyncTask = SyncTimeAsync();
-
         while (true)
         {
+            using var timeSyncTask = SyncTimeAsync();
             using var loginView = new LoginView();
             loginView.ShowDialog();
 
             if (loginView.LoginIsSuccessful)
             {
-                if (!timeIsSynced)
-                {
-                    await timeSyncTask;
-
-                    if (timeSyncTask.IsCompletedSuccessfully)
-                    {
-                        timeIsSynced = true;
-                    }
-                }
-
-                using var otpView = new OtpView(timeIsSynced);
+                await timeSyncTask;
+                using var otpView = new OtpView(timeSyncTask.IsCompletedSuccessfully);
                 otpView.ShowDialog();
             }
             else
