@@ -6,9 +6,9 @@ public static class ApplicationInfo
 {
     private static readonly Assembly Ass = Assembly.GetExecutingAssembly();
     private static readonly AssemblyTitleAttribute? Title = Ass.GetCustomAttribute<AssemblyTitleAttribute>();
-    private static readonly AssemblyFileVersionAttribute? FileVersion = Ass.GetCustomAttribute<AssemblyFileVersionAttribute>();
+    private static readonly AssemblyInformationalVersionAttribute? InformationalVersion = Ass.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
 
-    public const string AppBuild =
+    private const string AppBuild =
 #if DEBUG
         " [Debug]";
 #else
@@ -17,5 +17,5 @@ public static class ApplicationInfo
 
     public static string? AppTitle => Title?.Title;
 
-    public static string AppHeader => $"{Title?.Title} v{FileVersion?.Version}{AppBuild}";
+    public static string AppHeader => $"{AppTitle} v{InformationalVersion?.InformationalVersion}{AppBuild}";
 }
