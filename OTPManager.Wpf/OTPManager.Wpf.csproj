@@ -7,11 +7,12 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <AssemblyName>OTPManager</AssemblyName>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="MinVer" Version="7.0.0">
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-          <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Otp.NET" Version="1.4.1" />
         <PackageReference Include="QRCoder" Version="1.7.0" />
