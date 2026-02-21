@@ -28,6 +28,7 @@ public partial class OtpView : Window, IDisposable
         this.DataContext = this;
 
         this.timeSyncedStatusDot.Visibility = timeIsSynced ? Visibility.Visible : Visibility.Hidden;
+        this.infoMessageLabel.Content = timeIsSynced ? "Time synchronization completed" : string.Empty;
 
         this.SaveRecordCommand = new CommandHandler(this.SaveRecord, canExecute: () => this.Otps.Count > 0);
         this.InsertRecordCommand = new CommandHandler(this.InsertRecord, canExecute: () => true);
@@ -87,9 +88,9 @@ public partial class OtpView : Window, IDisposable
 
     private void ResetInfoMessage(object? sender, EventArgs e)
     {
-        if (!string.IsNullOrEmpty(this.infoMessageTextBlock.Text) && !this.infoMessageIsNew)
+        if (!string.IsNullOrEmpty(this.infoMessageLabel.Content.ToString()) && !this.infoMessageIsNew)
         {
-            this.infoMessageTextBlock.Text = string.Empty;
+            this.infoMessageLabel.Content = string.Empty;
         }
         else
         {
@@ -119,7 +120,7 @@ public partial class OtpView : Window, IDisposable
 
     private void PrintInfoMessage(string message)
     {
-        this.infoMessageTextBlock.Text = message;
+        this.infoMessageLabel.Content = message;
         this.infoMessageIsNew = true;
     }
 
@@ -374,7 +375,7 @@ public partial class OtpView : Window, IDisposable
     {
         this.InitData();
         this.SetupTimers();
-        this.programInfoTextBlock.Text = ApplicationInfo.AppHeader;
+        this.programInfoLabel.Content = ApplicationInfo.AppHeader;
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
