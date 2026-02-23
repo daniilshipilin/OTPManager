@@ -22,6 +22,8 @@ public partial class OtpView : Window, IDisposable
     private bool infoMessageIsNew;
     private string previousTotpValue = string.Empty;
 
+    public bool IsLogOffSequence { get; private set; }
+
     public OtpView(bool timeIsSynced)
     {
         this.InitializeComponent();
@@ -99,7 +101,10 @@ public partial class OtpView : Window, IDisposable
     }
 
     private void LogOffSession(object? sender, EventArgs e)
-        => this.Close();
+    {
+        this.IsLogOffSequence = true;
+        this.Close();
+    }
 
     private void OtpRefresh(object? sender, EventArgs e)
     {

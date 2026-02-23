@@ -50,6 +50,11 @@ public partial class App : Application
                 await timeSyncTask;
                 using var otpView = new OtpView(timeSyncTask.IsCompletedSuccessfully);
                 otpView.ShowDialog();
+
+                if (!otpView.IsLogOffSequence)
+                {
+                    break;
+                }
             }
             else
             {
