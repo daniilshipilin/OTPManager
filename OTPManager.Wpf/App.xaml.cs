@@ -1,6 +1,7 @@
 namespace OTPManager.Wpf;
 
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using OTPManager.Wpf.Helpers;
@@ -11,6 +12,12 @@ public partial class App : Application
 {
     private async void ApplicationStartup(object sender, StartupEventArgs e)
     {
+        if (CheckAnotherInstanceIsRunning(ApplicationInfo.AppTitle))
+        {
+            MessageBox.Show($"Another instance of '{ApplicationInfo.AppTitle}' is running", ApplicationInfo.AppHeader, MessageBoxButton.OK, MessageBoxImage.Warning);
+            ProgramExit(0);
+        }
+
         if (e.Args.Length > 0)
         {
             try
@@ -24,19 +31,22 @@ public partial class App : Application
                     else
                     {
                         MessageBox.Show("Encryption password change failed");
+                        ProgramExit(-1);
                     }
                 }
                 else
                 {
                     MessageBox.Show("Unknown args detected");
+                    ProgramExit(-1);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                ProgramExit(-1);
             }
 
-            Environment.Exit(0);
+            ProgramExit(0);
         }
 
         while (true)
@@ -62,8 +72,14 @@ public partial class App : Application
             }
         }
 
-        Environment.Exit(0);
+        ProgramExit(0);
     }
+
+    private static bool CheckAnotherInstanceIsRunning(string? programName)
+        => Process.GetProcessesByName(programName).Length > 1;
+
+    private static void ProgramExit(int exitCode)
+        => Environment.Exit(exitCode);
 
     private static async Task SyncTimeAsync()
     {
