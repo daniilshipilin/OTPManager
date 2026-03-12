@@ -1,6 +1,5 @@
 namespace OTPManager.Wpf.Helpers;
 
-using System.Text;
 using Microsoft.Win32;
 
 public static class AppSettings
@@ -21,16 +20,5 @@ public static class AppSettings
         get => (string?)RegKeyOTPManager.GetValue(nameof(OtpKeys)) ?? string.Empty;
 
         set => RegKeyOTPManager.SetValue(nameof(OtpKeys), value ?? string.Empty);
-    }
-
-    public static string ExportOtpKeysRegValue()
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine("Windows Registry Editor Version 5.00");
-        sb.AppendLine(string.Empty);
-        sb.AppendLine($"[{RegKeyOTPManager.Name}]");
-        sb.AppendLine($"\"{nameof(OtpKeys)}\"=\"{OtpKeys}\"");
-        sb.AppendLine();
-        return sb.ToString();
     }
 }

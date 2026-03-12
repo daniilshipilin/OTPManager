@@ -1,20 +1,16 @@
 namespace OTPManager.Wpf.Helpers;
 
 using System;
+using System.IO;
 using System.Security.Cryptography;
 
 public class SymmetricEncryption : IDisposable
 {
+    private readonly string IvKeyPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "iv.key");
+    private readonly byte[] iv;
     private readonly byte[] key;
     private readonly ICryptoTransform encryptor;
     private readonly ICryptoTransform decryptor;
-
-    private bool disposedValue;
-
-    public SymmetricEncryption()
-        : this(new byte[32])
-    {
-    }
 
     public SymmetricEncryption(byte[] key)
     {
@@ -23,24 +19,31 @@ public class SymmetricEncryption : IDisposable
             throw new ArgumentException("Key byte array size is incorrect", nameof(key));
         }
 
+        if (!File.Exists(this.IvKeyPath))
+        {
+            byte[] data = new byte[16];
+            RandomNumberGenerator.Fill(data);
+            using var fs = new FileStream(this.IvKeyPath, FileMode.CreateNew);
+            fs.Write(data);
+        }
+
         this.key = key;
+        this.iv = File.ReadAllBytes(this.IvKeyPath);
 
         (this.encryptor, this.decryptor) = this.GetCrypto();
     }
 
-    public byte[] Encrypt(byte[] textBytes)
+    public void Dispose()
     {
-        byte[] cipherText = this.encryptor.TransformFinalBlock(textBytes, 0, textBytes.Length);
-
-        return cipherText;
+        this.encryptor.Dispose();
+        this.decryptor.Dispose();
     }
 
-    public byte[] Decrypt(byte[] encryptedBytes)
-    {
-        byte[] plainBytes = this.decryptor.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
+    public byte[] Encrypt(byte[] data)
+        => this.encryptor.TransformFinalBlock(data, 0, data.Length);
 
-        return plainBytes;
-    }
+    public byte[] Decrypt(byte[] data)
+        => this.decryptor.TransformFinalBlock(data, 0, data.Length);
 
     public bool TryDecrypt(byte[] encryptedBytes, out byte[]? plainBytes)
     {
@@ -63,35 +66,11 @@ public class SymmetricEncryption : IDisposable
         using var aes = Aes.Create();
         aes.BlockSize = 128;
         aes.Key = this.key;
-        aes.IV = new byte[16];
+        aes.IV = this.iv;
 
         var encryptor = aes.CreateEncryptor();
         var decryptor = aes.CreateDecryptor();
 
         return (encryptor, decryptor);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!this.disposedValue)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-                this.encryptor.Dispose();
-                this.decryptor.Dispose();
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            this.disposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        this.Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }

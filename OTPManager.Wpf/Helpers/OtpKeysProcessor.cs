@@ -9,24 +9,27 @@ using OTPManager.Wpf.Models;
 
 public static class OtpKeysProcessor
 {
-    private static SymmetricEncryption encryption = new SymmetricEncryption();
+    private static readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
+    private static SymmetricEncryption? encryption;
 
     public static bool LoginIsSuccessful { get; private set; }
 
     public static void SetPassword(string password)
     {
-        byte[] hashedPassword = SHA256.HashData(Encoding.UTF8.GetBytes(password))[0..32];
+        byte[] hashedPassword = SHA256.HashData(Encoding.UTF8.GetBytes(password));
         encryption = new SymmetricEncryption(hashedPassword);
     }
 
     public static void ResetPassword()
-    {
-        encryption.Dispose();
-        encryption = new SymmetricEncryption();
-    }
+        => encryption?.Dispose();
 
     public static bool TryParseOtpKeys()
     {
+        if (encryption is null)
+        {
+            throw new ArgumentNullException(nameof(encryption));
+        }
+
         CheckOtpKeysValid();
 
         byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
@@ -51,11 +54,16 @@ public static class OtpKeysProcessor
 
     public static IEnumerable<OtpObject> LoadData()
     {
+        if (encryption is null)
+        {
+            throw new ArgumentNullException(nameof(encryption));
+        }
+
         CheckOtpKeysValid();
 
         byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
         string json = Encoding.UTF8.GetString(encryption.Decrypt(encryptedBytes));
-        var jsonObj = JsonSerializer.Deserialize<OtpKeysJson>(json);
+        var jsonObj = JsonSerializer.Deserialize<OtpKeysJson>(json, jsonSerializerOptions);
         var otps = new List<OtpObject>();
 
         if (jsonObj is not null)
@@ -76,6 +84,35 @@ public static class OtpKeysProcessor
 
     public static void SaveData(IEnumerable<OtpObject> otps)
     {
+        if (encryption is null)
+        {
+            throw new ArgumentNullException(nameof(encryption));
+        }
+
+        OtpKeysJson.Revision++;
+        OtpKeysJson.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
+
+        string json = GetOtpKeysJson(otps);
+        byte[] textBytes = Encoding.UTF8.GetBytes(json);
+        byte[] encryptedBytes = encryption.Encrypt(textBytes);
+        AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
+    }
+
+    public static void SaveData(string json)
+    {
+        if (encryption is null)
+        {
+            throw new ArgumentNullException(nameof(encryption));
+        }
+
+        var jsonObj = JsonSerializer.Deserialize<OtpKeysJson>(json, jsonSerializerOptions);
+        byte[] textBytes = Encoding.UTF8.GetBytes(json);
+        byte[] encryptedBytes = encryption.Encrypt(textBytes);
+        AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
+    }
+
+    public static string GetOtpKeysJson(IEnumerable<OtpObject> otps)
+    {
         var jsonObj = new OtpKeysJson();
 
         if (otps is not null)
@@ -93,19 +130,13 @@ public static class OtpKeysProcessor
             }
         }
 
-        OtpKeysJson.Revision++;
-        OtpKeysJson.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
-
-        byte[] textBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonObj));
-        byte[] encryptedBytes = encryption.Encrypt(textBytes);
-        AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
+        return JsonSerializer.Serialize(jsonObj, jsonSerializerOptions);
     }
 
     private static void CheckOtpKeysValid()
     {
         if (string.IsNullOrEmpty(AppSettings.OtpKeys))
         {
-            // save file with no record entries
             SaveData([]);
         }
     }

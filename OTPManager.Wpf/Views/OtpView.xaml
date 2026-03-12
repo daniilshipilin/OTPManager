@@ -209,11 +209,11 @@
                 Content="QR Code" />
 
             <Button
-                x:Name="randomButton"
+                x:Name="importButton"
                 Width="70"
                 Margin="0,0,5,0"
-                Command="{Binding GenerateRandomBase32KeyCommand}"
-                Content="Random" />
+                Command="{Binding ImportOtpKeysCommand}"
+                Content="Import" />
 
             <Button
                 x:Name="exportOtpKeysButton"

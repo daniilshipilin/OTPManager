@@ -13,9 +13,7 @@ public partial class LoginView : Window, IDisposable
         => this.InitializeComponent();
 
     public void Dispose()
-    {
-        this.passwordBox.Clear();
-    }
+        => this.passwordBox.Clear();
 
     private void Login()
     {

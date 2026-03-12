@@ -1,6 +1,7 @@
 namespace OTPManager.Wpf.Views;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -34,10 +35,10 @@ public partial class OtpView : Window, IDisposable
 
         this.SaveRecordCommand = new CommandHandler(this.SaveRecord, canExecute: () => this.Otps.Count > 0);
         this.InsertRecordCommand = new CommandHandler(this.InsertRecord, canExecute: () => true);
-        this.DeleteRecordCommand = new CommandHandler(this.DeleteRecord, canExecute: () => this.CanDeleteRecord);
-        this.ShowQRCodeCommand = new CommandHandler(this.ShowQRCode, canExecute: () => this.CanShowQRCode);
-        this.GenerateRandomBase32KeyCommand = new CommandHandler(this.GenerateRandomBase32Key, canExecute: () => this.CanGenerateRandomBase32Key);
-        this.ExportOtpKeysCommand = new CommandHandler(this.ExportOtpKeys, canExecute: () => true);
+        this.DeleteRecordCommand = new CommandHandler(this.DeleteRecord, canExecute: () => this.SelectedOtp is not null);
+        this.ShowQRCodeCommand = new CommandHandler(this.ShowQRCode, canExecute: () => this.SelectedOtp is not null);
+        this.ImportOtpKeysCommand = new CommandHandler(this.ImportOtpKeys, canExecute: () => true);
+        this.ExportOtpKeysCommand = new CommandHandler(this.ExportOtpKeys, canExecute: () => this.Otps.Count > 0);
     }
 
     public ObservableCollection<OtpObject> Otps { get; set; } = [];
@@ -52,15 +53,9 @@ public partial class OtpView : Window, IDisposable
 
     public ICommand ShowQRCodeCommand { get; }
 
-    public ICommand GenerateRandomBase32KeyCommand { get; }
+    public ICommand ImportOtpKeysCommand { get; }
 
     public ICommand ExportOtpKeysCommand { get; }
-
-    public bool CanDeleteRecord => this.SelectedOtp is not null;
-
-    public bool CanShowQRCode => this.SelectedOtp is not null;
-
-    public bool CanGenerateRandomBase32Key => this.SelectedOtp is not null;
 
     private void SetupTimers()
     {
@@ -137,9 +132,21 @@ public partial class OtpView : Window, IDisposable
         this.ClearTextBoxes();
         this.Otps.Clear();
 
-        foreach (var otpKey in OtpKeysProcessor.LoadData()
-                                        .OrderByDescending(x => x.IsFavorite)
-                                        .ThenBy(x => x.Description))
+        IEnumerable<OtpObject>? otpKeys = null;
+
+        try
+        {
+            otpKeys = OtpKeysProcessor.LoadData()
+                                      .OrderByDescending(x => x.IsFavorite)
+                                      .ThenBy(x => x.Description);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        foreach (var otpKey in otpKeys)
         {
             this.Otps.Add(otpKey);
         }
@@ -162,20 +169,55 @@ public partial class OtpView : Window, IDisposable
     {
         this.logOffTimer.Stop();
 
-        string otpKeysReg = AppSettings.ExportOtpKeysRegValue();
-        var saveFileDialog = new SaveFileDialog()
+        string otpKeysJson = OtpKeysProcessor.GetOtpKeysJson(this.Otps);
+        var saveFileDialog = new SaveFileDialog
         {
-            FileName = "OtpKeys",
+            FileName = $"OtpKeys_{DateTime.Now:yyyyMMdd}",
             InitialDirectory = Environment.CurrentDirectory,
-            Filter = "Registry file (*.reg)|*.reg",
+            Filter = "JSON file (*.json)|*.json",
         };
 
         bool? result = saveFileDialog.ShowDialog();
 
         if (result.HasValue && result.Value)
         {
-            File.WriteAllText(saveFileDialog.FileName, otpKeysReg);
+            File.WriteAllText(saveFileDialog.FileName, otpKeysJson);
             MessageBox.Show($"Otp keys successfully exported to '{saveFileDialog.FileName}'", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        this.logOffTimer.Start();
+    }
+
+    private void ImportOtpKeys()
+    {
+        this.logOffTimer.Stop();
+
+        if (MessageBox.Show("Import operation rewrites existing entries!", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
+        {
+            return;
+        }
+
+        var openFileDialog = new OpenFileDialog
+        {
+            InitialDirectory = Environment.CurrentDirectory,
+            Filter = "JSON file (*.json)|*.json",
+        };
+
+        bool? result = openFileDialog.ShowDialog();
+
+        if (result.HasValue && result.Value)
+        {
+            try
+            {
+                string data = File.ReadAllText(openFileDialog.FileName);
+                OtpKeysProcessor.SaveData(data);
+                this.InitData();
+                MessageBox.Show($"Otp keys successfully imported from '{openFileDialog.FileName}'", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                ShowExceptionMessage(ex);
+            }
         }
 
         this.logOffTimer.Start();
@@ -338,33 +380,6 @@ public partial class OtpView : Window, IDisposable
         bitmapimage.EndInit();
 
         return bitmapimage;
-    }
-
-    private void GenerateRandomBase32Key()
-    {
-        this.logOffTimer.Stop();
-        var dr = MessageBox.Show("Generate random base32 secret key?", "Prompt", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-        if (dr == MessageBoxResult.Yes)
-        {
-            if (this.SelectedOtp is not null)
-            {
-                try
-                {
-                    this.SelectedOtp.Base32SecretKey = OtpObject.GetRandomBase32String();
-                    this.SelectedOtp.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
-                    OtpKeysProcessor.SaveData(this.Otps);
-                    this.PrintInfoMessage("Base32 secret key generated");
-                    this.InitData();
-                }
-                catch (Exception ex)
-                {
-                    ShowExceptionMessage(ex);
-                }
-            }
-        }
-
-        this.logOffTimer.Start();
     }
 
     private static void ShowExceptionMessage(Exception ex)
