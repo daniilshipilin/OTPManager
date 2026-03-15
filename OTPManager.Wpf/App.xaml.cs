@@ -18,37 +18,6 @@ public partial class App : Application
             ProgramExit(0);
         }
 
-        if (e.Args.Length > 0)
-        {
-            try
-            {
-                if (e.Args[0].Equals("-p") && e.Args.Length == 3)
-                {
-                    if (OtpKeysProcessor.ChangeEncryptionPassword(e.Args[1], e.Args[2]))
-                    {
-                        MessageBox.Show("Encryption password successfully changed");
-                    }
-                    else
-                    {
-                        MessageBox.Show("Encryption password change failed");
-                        ProgramExit(-1);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Unknown args detected");
-                    ProgramExit(-1);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
-                ProgramExit(-1);
-            }
-
-            ProgramExit(0);
-        }
-
         while (true)
         {
             using var timeSyncTask = SyncTimeAsync();

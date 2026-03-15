@@ -209,8 +209,8 @@ public partial class OtpView : Window, IDisposable
         {
             try
             {
-                string data = File.ReadAllText(openFileDialog.FileName);
-                OtpKeysProcessor.SaveData(data);
+                string json = File.ReadAllText(openFileDialog.FileName);
+                OtpKeysProcessor.SaveData(json);
                 this.InitData();
                 MessageBox.Show($"Otp keys successfully imported from '{openFileDialog.FileName}'", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }

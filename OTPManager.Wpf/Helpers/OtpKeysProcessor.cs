@@ -2,68 +2,42 @@ namespace OTPManager.Wpf.Helpers;
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using OTPManager.Wpf.Models;
 
 public static class OtpKeysProcessor
 {
     private static readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
-    private static SymmetricEncryption? encryption;
+    private static CipherService encryption = new([]);
 
     public static bool LoginIsSuccessful { get; private set; }
 
-    public static void SetPassword(string password)
-    {
-        byte[] hashedPassword = SHA256.HashData(Encoding.UTF8.GetBytes(password));
-        encryption = new SymmetricEncryption(hashedPassword);
-    }
-
-    public static void ResetPassword()
-        => encryption?.Dispose();
+    public static void SetPassword(byte[] password)
+        => encryption = new CipherService(password);
 
     public static bool TryParseOtpKeys()
     {
-        if (encryption is null)
+        if (string.IsNullOrEmpty(AppSettings.OtpKeys))
         {
-            throw new ArgumentNullException(nameof(encryption));
+            SaveData([]);
         }
 
-        CheckOtpKeysValid();
-
-        byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
-        LoginIsSuccessful = encryption.TryDecrypt(encryptedBytes, out _);
-
-        return LoginIsSuccessful;
-    }
-
-    public static bool ChangeEncryptionPassword(string currentPassword, string newPassword)
-    {
-        SetPassword(currentPassword);
-
-        if (TryParseOtpKeys())
-        {
-            var data = LoadData();
-            SetPassword(newPassword);
-            SaveData(data);
-        }
+        byte[] cipherText = Convert.FromBase64String(AppSettings.OtpKeys);
+        LoginIsSuccessful = encryption.TryDecrypt(cipherText, out string? plainText);
 
         return LoginIsSuccessful;
     }
 
     public static IEnumerable<OtpObject> LoadData()
     {
-        if (encryption is null)
+        byte[] cipherText = Convert.FromBase64String(AppSettings.OtpKeys);
+
+        if (!encryption.TryDecrypt(cipherText, out string? json))
         {
-            throw new ArgumentNullException(nameof(encryption));
+            return [];
         }
 
-        CheckOtpKeysValid();
-
-        byte[] encryptedBytes = Convert.FromBase64String(AppSettings.OtpKeys);
-        string json = Encoding.UTF8.GetString(encryption.Decrypt(encryptedBytes));
-        var jsonObj = JsonSerializer.Deserialize<OtpKeysJson>(json, jsonSerializerOptions);
+        var jsonObj = JsonSerializer.Deserialize<OtpKeysJson>(json!, jsonSerializerOptions);
         var otps = new List<OtpObject>();
 
         if (jsonObj is not null)
@@ -84,31 +58,19 @@ public static class OtpKeysProcessor
 
     public static void SaveData(IEnumerable<OtpObject> otps)
     {
-        if (encryption is null)
-        {
-            throw new ArgumentNullException(nameof(encryption));
-        }
-
         OtpKeysJson.Revision++;
         OtpKeysJson.LastEditTimestamp = TimestampHelper.GetUnixTimestamp();
 
         string json = GetOtpKeysJson(otps);
-        byte[] textBytes = Encoding.UTF8.GetBytes(json);
-        byte[] encryptedBytes = encryption.Encrypt(textBytes);
-        AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
+        byte[] cipherText = encryption.Encrypt(json);
+        AppSettings.OtpKeys = Convert.ToBase64String(cipherText, Base64FormattingOptions.InsertLineBreaks);
     }
 
     public static void SaveData(string json)
     {
-        if (encryption is null)
-        {
-            throw new ArgumentNullException(nameof(encryption));
-        }
-
-        var jsonObj = JsonSerializer.Deserialize<OtpKeysJson>(json, jsonSerializerOptions);
-        byte[] textBytes = Encoding.UTF8.GetBytes(json);
-        byte[] encryptedBytes = encryption.Encrypt(textBytes);
-        AppSettings.OtpKeys = Convert.ToBase64String(encryptedBytes);
+        JsonSerializer.Deserialize<OtpKeysJson>(json, jsonSerializerOptions);
+        byte[] cipherText = encryption.Encrypt(json);
+        AppSettings.OtpKeys = Convert.ToBase64String(cipherText, Base64FormattingOptions.InsertLineBreaks);
     }
 
     public static string GetOtpKeysJson(IEnumerable<OtpObject> otps)
@@ -131,13 +93,5 @@ public static class OtpKeysProcessor
         }
 
         return JsonSerializer.Serialize(jsonObj, jsonSerializerOptions);
-    }
-
-    private static void CheckOtpKeysValid()
-    {
-        if (string.IsNullOrEmpty(AppSettings.OtpKeys))
-        {
-            SaveData([]);
-        }
     }
 }

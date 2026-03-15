@@ -1,6 +1,7 @@
 namespace OTPManager.Wpf.Views;
 
 using System;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using OTPManager.Wpf.Helpers;
@@ -43,7 +44,6 @@ public partial class LoginView : Window, IDisposable
             MessageBoxImage.Exclamation);
 
         this.passwordBox.Clear();
-        OtpKeysProcessor.ResetPassword();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -55,7 +55,7 @@ public partial class LoginView : Window, IDisposable
 
     private void LoginButton_Click(object sender, RoutedEventArgs e)
     {
-        OtpKeysProcessor.SetPassword(this.passwordBox.Password);
+        OtpKeysProcessor.SetPassword(Encoding.UTF8.GetBytes(this.passwordBox.Password));
         this.Login();
     }
 
@@ -74,7 +74,7 @@ public partial class LoginView : Window, IDisposable
     {
         if (e.Key == Key.Enter && !string.IsNullOrEmpty(this.passwordBox.Password))
         {
-            OtpKeysProcessor.SetPassword(this.passwordBox.Password);
+            OtpKeysProcessor.SetPassword(Encoding.UTF8.GetBytes(this.passwordBox.Password));
             this.Login();
         }
     }
